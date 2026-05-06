@@ -52,7 +52,7 @@ export default function Home() {
               Web uygulaması başlangıcı hazır
             </p>
             <h2 className="mt-2 max-w-2xl text-3xl font-semibold leading-tight md:text-5xl">
-              Admin ve teknisyen servis akışları tarayıcıdan yönetilecek.
+              Admin ve üye servis kayıtları tarayıcıdan yönetilecek.
             </h2>
           </div>
 

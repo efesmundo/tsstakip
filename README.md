@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tedeta Servis Takip
 
-## Getting Started
+Next.js, TypeScript, Tailwind CSS ve Supabase ile geliştirilen servis kayıt yönetim uygulaması.
 
-First, run the development server:
+## Roller
+
+- `admin`: Üyeleri yönetir, üye ekler/siler, tüm servis kayıtlarını görüntüler ve düzenler.
+- `member`: Sadece kendi adına servis kaydı açar ve kendi kayıtlarını görüntüler.
+
+## Kurulum
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Uygulama varsayılan olarak [http://localhost:3000](http://localhost:3000) adresinde çalışır.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Ortam Değişkenleri
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`.env.example` dosyasını `.env.local` olarak kopyalayıp değerleri doldurun.
 
-## Learn More
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SECRET_KEY=
+```
 
-To learn more about Next.js, take a look at the following resources:
+`SUPABASE_SECRET_KEY` sadece server-side admin işlemlerinde kullanılır. Vercel deploy sırasında bu üç değişkeni Project Settings > Environment Variables alanına ekleyin.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Supabase
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+SQL migration dosyaları `supabase/migrations` altında tutulur. Yeni kurulumda dosyaları sıra ile çalıştırın:
 
-## Deploy on Vercel
+```text
+001_initial_schema.sql
+002_add_member_role.sql
+003_member_access_model.sql
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Eğer daha önce eski teknisyen modeli çalıştırıldıysa, `002` ve `003` migration dosyaları rol modelini `admin/member` yapısına taşır.

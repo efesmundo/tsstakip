@@ -2,7 +2,7 @@ create extension if not exists "pgcrypto";
 
 do $$
 begin
-  create type public.user_role as enum ('admin', 'technician');
+  create type public.user_role as enum ('admin', 'member');
 exception
   when duplicate_object then null;
 end $$;
@@ -71,7 +71,7 @@ create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text not null,
   phone text,
-  role public.user_role not null default 'technician',
+  role public.user_role not null default 'member',
   is_active boolean not null default true,
   avatar_url text,
   created_at timestamptz not null default now(),
@@ -134,12 +134,12 @@ create table if not exists public.services (
   project_name text,
   product_group_id uuid references public.product_groups(id) on delete set null,
   service_type_id uuid references public.service_types(id) on delete set null,
+  member_id uuid references public.profiles(id) on delete set null,
   priority public.service_priority not null default 'normal',
   scheduled_at timestamptz,
   description text,
   status public.service_status not null default 'pending',
   team_type public.team_type not null default 'technical_team',
-  assigned_technician_id uuid references public.profiles(id) on delete set null,
   subcontractor_id uuid references public.subcontractors(id) on delete set null,
   subcontractor_contact text,
   subcontractor_phone text,
@@ -184,8 +184,7 @@ create index if not exists profiles_role_idx on public.profiles(role);
 create index if not exists profiles_active_idx on public.profiles(is_active);
 create index if not exists services_scheduled_at_idx on public.services(scheduled_at);
 create index if not exists services_status_idx on public.services(status);
-create index if not exists services_assigned_technician_idx
-  on public.services(assigned_technician_id);
+create index if not exists services_member_idx on public.services(member_id);
 create index if not exists service_photos_service_id_idx
   on public.service_photos(service_id);
 
@@ -240,7 +239,7 @@ as $$
   );
 $$;
 
-create or replace function public.is_assigned_technician(
+create or replace function public.is_service_member(
   service_id uuid,
   user_id uuid default auth.uid()
 )
@@ -254,7 +253,7 @@ as $$
     select 1
     from public.services
     where id = service_id
-      and assigned_technician_id = user_id
+      and member_id = user_id
   );
 $$;
 
@@ -270,7 +269,7 @@ begin
     new.id,
     coalesce(new.raw_user_meta_data ->> 'full_name', split_part(new.email, '@', 1)),
     new.raw_user_meta_data ->> 'phone',
-    coalesce((new.raw_user_meta_data ->> 'role')::public.user_role, 'technician')
+    coalesce((new.raw_user_meta_data ->> 'role')::public.user_role, 'member')
   )
   on conflict (id) do nothing;
 
@@ -306,14 +305,6 @@ on public.profiles
 for select
 to authenticated
 using (id = auth.uid());
-
-drop policy if exists "Profiles users update own basic data" on public.profiles;
-create policy "Profiles users update own basic data"
-on public.profiles
-for update
-to authenticated
-using (id = auth.uid())
-with check (id = auth.uid());
 
 drop policy if exists "Subcontractors admin full access" on public.subcontractors;
 create policy "Subcontractors admin full access"
@@ -398,20 +389,23 @@ to authenticated
 using (public.is_admin())
 with check (public.is_admin());
 
-drop policy if exists "Services technicians read assigned" on public.services;
-create policy "Services technicians read assigned"
+drop policy if exists "Services members read own" on public.services;
+create policy "Services members read own"
 on public.services
 for select
 to authenticated
-using (assigned_technician_id = auth.uid());
+using (member_id = auth.uid());
 
-drop policy if exists "Services technicians update assigned" on public.services;
-create policy "Services technicians update assigned"
+drop policy if exists "Services members create own" on public.services;
+create policy "Services members create own"
 on public.services
-for update
+for insert
 to authenticated
-using (assigned_technician_id = auth.uid())
-with check (assigned_technician_id = auth.uid());
+with check (
+  member_id = auth.uid()
+  and created_by = auth.uid()
+  and status = 'pending'
+);
 
 drop policy if exists "Service photos admin full access" on public.service_photos;
 create policy "Service photos admin full access"
@@ -421,21 +415,21 @@ to authenticated
 using (public.is_admin())
 with check (public.is_admin());
 
-drop policy if exists "Service photos technicians read assigned" on public.service_photos;
-create policy "Service photos technicians read assigned"
+drop policy if exists "Service photos members read own service" on public.service_photos;
+create policy "Service photos members read own service"
 on public.service_photos
 for select
 to authenticated
-using (public.is_assigned_technician(service_id));
+using (public.is_service_member(service_id));
 
-drop policy if exists "Service photos technicians insert assigned" on public.service_photos;
-create policy "Service photos technicians insert assigned"
+drop policy if exists "Service photos members insert own service" on public.service_photos;
+create policy "Service photos members insert own service"
 on public.service_photos
 for insert
 to authenticated
 with check (
   uploaded_by = auth.uid()
-  and public.is_assigned_technician(service_id)
+  and public.is_service_member(service_id)
 );
 
 create or replace function public.service_id_from_storage_name(object_name text)
@@ -475,25 +469,25 @@ to authenticated
 using (bucket_id = 'service-photos' and public.is_admin())
 with check (bucket_id = 'service-photos' and public.is_admin());
 
-drop policy if exists "Service photo objects technicians read assigned" on storage.objects;
-create policy "Service photo objects technicians read assigned"
+drop policy if exists "Service photo objects members read own service" on storage.objects;
+create policy "Service photo objects members read own service"
 on storage.objects
 for select
 to authenticated
 using (
   bucket_id = 'service-photos'
-  and public.is_assigned_technician(public.service_id_from_storage_name(name))
+  and public.is_service_member(public.service_id_from_storage_name(name))
 );
 
-drop policy if exists "Service photo objects technicians upload assigned" on storage.objects;
-create policy "Service photo objects technicians upload assigned"
+drop policy if exists "Service photo objects members upload own service" on storage.objects;
+create policy "Service photo objects members upload own service"
 on storage.objects
 for insert
 to authenticated
 with check (
   bucket_id = 'service-photos'
   and (storage.foldername(name))[1] = 'services'
-  and public.is_assigned_technician(public.service_id_from_storage_name(name))
+  and public.is_service_member(public.service_id_from_storage_name(name))
 );
 
 insert into public.priority_settings (priority, label, is_active, sort_order)

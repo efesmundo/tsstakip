@@ -1,4 +1,4 @@
-export type UserRole = "admin" | "technician";
+export type UserRole = "admin" | "member";
 export type ServicePriority = "urgent" | "high" | "normal" | "low";
 export type ServiceStatus =
   | "pending"
@@ -46,6 +46,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
+        Relationships: [];
       };
       subcontractors: {
         Row: {
@@ -67,6 +68,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["subcontractors"]["Insert"]>;
+        Relationships: [];
       };
       product_groups: {
         Row: {
@@ -84,6 +86,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["product_groups"]["Insert"]>;
+        Relationships: [];
       };
       service_types: {
         Row: {
@@ -103,6 +106,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["service_types"]["Insert"]>;
+        Relationships: [];
       };
       priority_settings: {
         Row: {
@@ -122,6 +126,7 @@ export type Database = {
         Update: Partial<
           Database["public"]["Tables"]["priority_settings"]["Insert"]
         >;
+        Relationships: [];
       };
       photo_rules: {
         Row: {
@@ -141,6 +146,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["photo_rules"]["Insert"]>;
+        Relationships: [];
       };
       services: {
         Row: {
@@ -153,12 +159,12 @@ export type Database = {
           project_name: string | null;
           product_group_id: string | null;
           service_type_id: string | null;
+          member_id: string | null;
           priority: ServicePriority;
           scheduled_at: string | null;
           description: string | null;
           status: ServiceStatus;
           team_type: TeamType;
-          assigned_technician_id: string | null;
           subcontractor_id: string | null;
           subcontractor_contact: string | null;
           subcontractor_phone: string | null;
@@ -187,12 +193,12 @@ export type Database = {
           project_name?: string | null;
           product_group_id?: string | null;
           service_type_id?: string | null;
+          member_id?: string | null;
           priority?: ServicePriority;
           scheduled_at?: string | null;
           description?: string | null;
           status?: ServiceStatus;
           team_type?: TeamType;
-          assigned_technician_id?: string | null;
           subcontractor_id?: string | null;
           subcontractor_contact?: string | null;
           subcontractor_phone?: string | null;
@@ -212,6 +218,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["services"]["Insert"]>;
+        Relationships: [];
       };
       service_photos: {
         Row: {
@@ -233,6 +240,7 @@ export type Database = {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["service_photos"]["Insert"]>;
+        Relationships: [];
       };
     };
     Views: Record<string, never>;
