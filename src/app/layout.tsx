@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Tedeta Servis Yönetimi",
-  description: "Admin ve teknisyen ekipleri için servis yönetim uygulaması.",
+  description: "Admin ve üyeler için servis kayıt yönetim uygulaması.",
 };
 
 export default function RootLayout({
