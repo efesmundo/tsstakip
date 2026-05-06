@@ -39,3 +39,9 @@ SQL migration dosyaları `supabase/migrations` altında tutulur. Yeni kurulumda 
 ```
 
 Eğer daha önce eski teknisyen modeli çalıştırıldıysa, `002` ve `003` migration dosyaları rol modelini `admin/member` yapısına taşır.
+
+`001_initial_schema.sql` çalışırken `column "member_id" does not exist` hatası alınırsa önce şu repair dosyasını çalıştırın, sonra `001_initial_schema.sql` dosyasını tekrar çalıştırın:
+
+```text
+supabase/repairs/repair_001_member_id_missing.sql
+```

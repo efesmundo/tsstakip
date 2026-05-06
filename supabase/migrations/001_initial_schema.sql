@@ -170,6 +170,32 @@ create table if not exists public.services (
   )
 );
 
+alter table public.services
+  add column if not exists member_id uuid references public.profiles(id) on delete set null;
+
+update public.services
+set member_id = created_by
+where member_id is null
+  and created_by is not null;
+
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'services'
+      and column_name = 'assigned_technician_id'
+  ) then
+    execute '
+      update public.services
+      set member_id = assigned_technician_id
+      where member_id is null
+        and assigned_technician_id is not null
+    ';
+  end if;
+end $$;
+
 create table if not exists public.service_photos (
   id uuid primary key default gen_random_uuid(),
   service_id uuid not null references public.services(id) on delete cascade,
@@ -382,6 +408,8 @@ to authenticated
 using (true);
 
 drop policy if exists "Services admin full access" on public.services;
+drop policy if exists "Services technicians read assigned" on public.services;
+drop policy if exists "Services technicians update assigned" on public.services;
 create policy "Services admin full access"
 on public.services
 for all
@@ -408,6 +436,8 @@ with check (
 );
 
 drop policy if exists "Service photos admin full access" on public.service_photos;
+drop policy if exists "Service photos technicians read assigned" on public.service_photos;
+drop policy if exists "Service photos technicians insert assigned" on public.service_photos;
 create policy "Service photos admin full access"
 on public.service_photos
 for all
@@ -462,6 +492,8 @@ set public = excluded.public,
     allowed_mime_types = excluded.allowed_mime_types;
 
 drop policy if exists "Service photo objects admin full access" on storage.objects;
+drop policy if exists "Service photo objects technicians read assigned" on storage.objects;
+drop policy if exists "Service photo objects technicians upload assigned" on storage.objects;
 create policy "Service photo objects admin full access"
 on storage.objects
 for all
