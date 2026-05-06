@@ -1,4 +1,4 @@
-# Tedeta Servis Takip
+# TSS Takip
 
 Next.js, TypeScript, Tailwind CSS ve Supabase ile geliştirilen servis kayıt yönetim uygulaması.
 
@@ -38,7 +38,7 @@ SQL migration dosyaları `supabase/migrations` altında tutulur. Yeni kurulumda 
 003_member_access_model.sql
 ```
 
-Eğer daha önce eski teknisyen modeli çalıştırıldıysa, `002` ve `003` migration dosyaları rol modelini `admin/member` yapısına taşır.
+Eğer daha önce eski rol modeli çalıştırıldıysa, `002` ve `003` migration dosyaları rol modelini `admin/member` yapısına taşır.
 
 `001_initial_schema.sql` çalışırken `column "member_id" does not exist` hatası alınırsa önce şu repair dosyasını çalıştırın, sonra `001_initial_schema.sql` dosyasını tekrar çalıştırın:
 

@@ -12,8 +12,8 @@ export default function Home() {
               <ClipboardList size={22} aria-hidden="true" />
             </div>
             <div>
-              <p className="text-sm font-medium text-accent-strong">Tedeta</p>
-              <h1 className="text-2xl font-semibold">Servis Yönetimi</h1>
+              <p className="text-sm font-medium text-accent-strong">TSS Takip</p>
+              <h1 className="text-2xl font-semibold">Servis Kayıt Yönetimi</h1>
             </div>
           </div>
 

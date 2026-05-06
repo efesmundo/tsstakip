@@ -26,7 +26,7 @@ export function SignOutButton() {
       type="button"
     >
       <LogOut size={16} aria-hidden="true" />
-      {isSigningOut ? "Cikiliyor..." : "Çıkış Yap"}
+      {isSigningOut ? "Çıkılıyor..." : "Çıkış Yap"}
     </button>
   );
 }

@@ -34,7 +34,7 @@ export function LoginForm() {
 
       const userId = data.user?.id;
       if (!userId) {
-        setError("Oturum acilamadi. Lutfen tekrar deneyin.");
+        setError("Oturum açılamadı. Lütfen tekrar deneyin.");
         return;
       }
 
@@ -51,7 +51,7 @@ export function LoginForm() {
 
       if (!profile.is_active) {
         await supabase.auth.signOut();
-        setError("Bu kullanici pasif durumda. Lutfen admin ile iletisime gecin.");
+        setError("Bu kullanıcı pasif durumda. Lütfen admin ile iletişime geçin.");
         return;
       }
 
@@ -107,7 +107,7 @@ export function LoginForm() {
         disabled={status === "loading"}
         type="submit"
       >
-        {status === "loading" ? "Giris yapiliyor..." : "Giriş Yap"}
+        {status === "loading" ? "Giriş yapılıyor..." : "Giriş Yap"}
       </button>
     </form>
   );

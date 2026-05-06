@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tedeta Servis Yönetimi",
+  title: "TSS Takip",
   description: "Admin ve üyeler için servis kayıt yönetim uygulaması.",
 };
 
