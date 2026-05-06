@@ -1,4 +1,6 @@
-import { Camera, ClipboardList, LockKeyhole, UserRound } from "lucide-react";
+import { Camera, ClipboardList } from "lucide-react";
+
+import { LoginForm } from "@/components/auth/LoginForm";
 
 export default function Home() {
   return (
@@ -15,35 +17,7 @@ export default function Home() {
             </div>
           </div>
 
-          <form className="space-y-5">
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium">E-posta</span>
-              <div className="flex h-12 items-center gap-3 rounded-md border border-border bg-background px-3">
-                <UserRound size={18} aria-hidden="true" />
-                <input
-                  className="h-full w-full bg-transparent text-sm outline-none"
-                  placeholder="admin@tedeta.com"
-                  type="email"
-                />
-              </div>
-            </label>
-
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium">Şifre</span>
-              <div className="flex h-12 items-center gap-3 rounded-md border border-border bg-background px-3">
-                <LockKeyhole size={18} aria-hidden="true" />
-                <input
-                  className="h-full w-full bg-transparent text-sm outline-none"
-                  placeholder="••••••••"
-                  type="password"
-                />
-              </div>
-            </label>
-
-            <button className="h-12 w-full rounded-md bg-accent px-4 text-sm font-semibold text-white transition hover:bg-accent-strong">
-              Giriş Yap
-            </button>
-          </form>
+          <LoginForm />
         </div>
 
         <div className="space-y-5">
