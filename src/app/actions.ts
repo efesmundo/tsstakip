@@ -33,6 +33,11 @@ function dateTime(value: string | null) {
   return value ? new Date(value).toISOString() : null;
 }
 
+function adminReturnPath(formData: FormData) {
+  const value = text(formData, "return_to");
+  return value === "/admin/management" ? "/admin/management" : "/admin/members";
+}
+
 type ActionSupabaseClient = Awaited<ReturnType<typeof requireProfile>>["supabase"];
 
 async function teamFields(
@@ -227,6 +232,7 @@ export async function deleteServicePhotoAction(formData: FormData) {
 
 export async function createMemberAction(formData: FormData) {
   await requireAdmin();
+  const returnTo = adminReturnPath(formData);
   try {
     await createMemberAccount({
       email: text(formData, "email") ?? "",
@@ -237,14 +243,15 @@ export async function createMemberAction(formData: FormData) {
     });
   } catch (error) {
     console.error("Member action failed:", error);
-    redirect(`/admin/members?error=${encodeURIComponent(formatError(error))}`);
+    redirect(`${returnTo}?error=${encodeURIComponent(formatError(error))}`);
   }
-  revalidatePath("/admin/members");
-  redirect("/admin/members?ok=1");
+  revalidatePath(returnTo);
+  redirect(`${returnTo}?ok=1`);
 }
 
 export async function updateMemberAction(formData: FormData) {
   await requireAdmin();
+  const returnTo = adminReturnPath(formData);
   const id = text(formData, "id");
   if (!id) return;
   try {
@@ -256,22 +263,23 @@ export async function updateMemberAction(formData: FormData) {
     });
   } catch (error) {
     console.error("Member action failed:", error);
-    redirect(`/admin/members?error=${encodeURIComponent(formatError(error))}`);
+    redirect(`${returnTo}?error=${encodeURIComponent(formatError(error))}`);
   }
-  revalidatePath("/admin/members");
+  revalidatePath(returnTo);
 }
 
 export async function deleteMemberAction(formData: FormData) {
   await requireAdmin();
+  const returnTo = adminReturnPath(formData);
   const id = text(formData, "id");
   if (!id) return;
   try {
     await deleteMemberAccount(id);
   } catch (error) {
     console.error("Member action failed:", error);
-    redirect(`/admin/members?error=${encodeURIComponent(formatError(error))}`);
+    redirect(`${returnTo}?error=${encodeURIComponent(formatError(error))}`);
   }
-  revalidatePath("/admin/members");
+  revalidatePath(returnTo);
 }
 
 export async function createProductGroupAction(formData: FormData) {

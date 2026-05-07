@@ -34,12 +34,19 @@ export default async function AdminPage() {
   const awaiting = services.filter((item) => item.status === "awaiting_approval");
   const completed = services.filter((item) => item.status === "completed");
   const urgent = services.filter((item) => item.priority === "urgent");
+  const inProgress = services.filter((item) => item.status === "in_progress");
+  const approved = services.filter((item) => item.status === "approved");
 
   const stats = [
-    { label: "Bugün", value: todayServices.length, color: "text-accent" },
-    { label: "Onay Bekliyor", value: awaiting.length, color: "text-amber-600" },
-    { label: "Tamamlandı", value: completed.length, color: "text-emerald-600" },
-    { label: "Acil", value: urgent.length, color: "text-red-700" },
+    { label: "Bugün Açılan", value: todayServices.length },
+    { label: "Onay Bekleyen", value: awaiting.length },
+    { label: "Devam Eden", value: inProgress.length },
+    { label: "Tamamlanan", value: completed.length },
+  ];
+  const statusRows = [
+    { label: "Onaylandı", value: approved.length },
+    { label: "Acil", value: urgent.length },
+    { label: "Toplam Servis", value: services.length },
   ];
 
   return (
@@ -61,22 +68,43 @@ export default async function AdminPage() {
         title="Dashboard"
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map(({ label, value, color }) => (
-          <div
-            className="rounded-xl bg-panel p-5 transition hover:-translate-y-0.5 hover:shadow-md"
-            key={label}
-            style={{ boxShadow: "var(--shadow-sm)" }}
-          >
-            <p className="text-sm font-medium text-foreground/60">{label}</p>
-            <p className={`mt-1.5 text-3xl font-bold ${color}`}>{value}</p>
+      <section className="grid gap-4 xl:grid-cols-[1fr_360px]">
+        <div className="rounded-xl border border-border bg-panel p-4" style={{ boxShadow: "var(--shadow-sm)" }}>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <h2 className="font-semibold">Operasyon Özeti</h2>
+              <p className="text-sm text-foreground/55">Bugünkü hareket ve açık iş yükü</p>
+            </div>
+            <span className="rounded-md bg-panel-muted px-2.5 py-1 text-xs font-semibold text-foreground/55">
+              {new Date().toLocaleDateString("tr-TR")}
+            </span>
           </div>
-        ))}
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {stats.map(({ label, value }) => (
+              <div className="rounded-lg border border-border bg-background p-3" key={label}>
+                <p className="text-xs font-medium uppercase tracking-wide text-foreground/45">{label}</p>
+                <p className="mt-2 text-2xl font-semibold text-foreground">{value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-panel p-4" style={{ boxShadow: "var(--shadow-sm)" }}>
+          <h2 className="font-semibold">İş Yükü</h2>
+          <div className="mt-3 divide-y divide-border">
+            {statusRows.map((row) => (
+              <div className="flex items-center justify-between py-2.5 text-sm" key={row.label}>
+                <span className="text-foreground/60">{row.label}</span>
+                <span className="font-semibold">{row.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
-      <section className="mt-5 space-y-4">
-        <ServiceGroup baseHref="/admin/services" lookup={lookup} services={todayServices} title="Bugünün Servisleri" />
-        <ServiceGroup baseHref="/admin/services" lookup={lookup} services={awaiting} title="Onay Bekleyen Servisler" />
+      <section className="mt-5 grid gap-4 xl:grid-cols-3">
+        <ServiceGroup baseHref="/admin/services" lookup={lookup} services={todayServices} title="Bugün Açılanlar" />
+        <ServiceGroup baseHref="/admin/services" lookup={lookup} services={awaiting} title="Onay Bekleyenler" />
         <ServiceGroup baseHref="/admin/services" lookup={lookup} services={urgent} title="Acil Servisler" />
       </section>
     </>
