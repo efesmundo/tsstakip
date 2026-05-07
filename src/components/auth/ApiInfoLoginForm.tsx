@@ -7,11 +7,17 @@ import { useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type LoginState = "idle" | "loading";
+const rememberedEmailKey = "tss-takip-remembered-email";
 
 export function ApiInfoLoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() =>
+    typeof window === "undefined" ? "" : (window.localStorage.getItem(rememberedEmailKey) ?? ""),
+  );
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(() =>
+    typeof window === "undefined" ? false : Boolean(window.localStorage.getItem(rememberedEmailKey)),
+  );
   const [status, setStatus] = useState<LoginState>("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -53,6 +59,12 @@ export function ApiInfoLoginForm() {
         await supabase.auth.signOut();
         setError("Bu sayfaya yalnızca aktif admin kullanıcıları giriş yapabilir.");
         return;
+      }
+
+      if (rememberMe) {
+        window.localStorage.setItem(rememberedEmailKey, email.trim());
+      } else {
+        window.localStorage.removeItem(rememberedEmailKey);
       }
 
       router.replace("/api/v1/info");
@@ -101,6 +113,16 @@ export function ApiInfoLoginForm() {
           />
         </div>
       </div>
+
+      <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-foreground/70">
+        <input
+          checked={rememberMe}
+          className="size-4 rounded border-border accent-[var(--accent)]"
+          onChange={(event) => setRememberMe(event.target.checked)}
+          type="checkbox"
+        />
+        Beni hatırla
+      </label>
 
       {error ? (
         <div className="rounded-lg border border-danger/25 bg-danger/8 px-4 py-3 text-sm text-danger">
