@@ -34,6 +34,23 @@ function dateTime(value: string | null) {
   return value ? new Date(value).toISOString() : null;
 }
 
+function formatError(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "object" && error !== null) {
+    const obj = error as Record<string, unknown>;
+    for (const key of ["message", "msg", "error", "details", "hint"]) {
+      const value = obj[key];
+      if (typeof value === "string" && value.length > 0) return value;
+    }
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return String(error);
+    }
+  }
+  return String(error);
+}
+
 export async function createServiceAction(formData: FormData) {
   const { supabase, user, profile } = await requireProfile();
   const feeType = (text(formData, "fee_type") ?? "free") as FeeType;
@@ -181,8 +198,8 @@ export async function createMemberAction(formData: FormData) {
       role: (text(formData, "role") ?? "member") as UserRole,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Bilinmeyen hata";
-    redirect(`/admin/members?error=${encodeURIComponent(message)}`);
+    console.error("Member action failed:", error);
+    redirect(`/admin/members?error=${encodeURIComponent(formatError(error))}`);
   }
   revalidatePath("/admin/members");
   redirect("/admin/members?ok=1");
@@ -200,8 +217,8 @@ export async function updateMemberAction(formData: FormData) {
       isActive: bool(formData, "is_active"),
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Bilinmeyen hata";
-    redirect(`/admin/members?error=${encodeURIComponent(message)}`);
+    console.error("Member action failed:", error);
+    redirect(`/admin/members?error=${encodeURIComponent(formatError(error))}`);
   }
   revalidatePath("/admin/members");
 }
@@ -213,8 +230,8 @@ export async function deleteMemberAction(formData: FormData) {
   try {
     await deleteMemberAccount(id);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Bilinmeyen hata";
-    redirect(`/admin/members?error=${encodeURIComponent(message)}`);
+    console.error("Member action failed:", error);
+    redirect(`/admin/members?error=${encodeURIComponent(formatError(error))}`);
   }
   revalidatePath("/admin/members");
 }

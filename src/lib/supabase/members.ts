@@ -71,32 +71,51 @@ export async function createMemberAccount(input: CreateMemberInput) {
 
   // Direct fetch — supabase-js v2.105.3 has a bug in auth.admin.createUser
   // that returns HTML parse errors. Using REST endpoint directly works.
-  const user = await adminAuthFetch<AuthAdminUser>("/admin/users", {
-    method: "POST",
-    body: JSON.stringify({
-      email: input.email,
-      password: input.password,
-      email_confirm: true,
-      user_metadata: {
-        full_name: input.fullName,
-        phone: input.phone,
-        role,
-      },
-    }),
-  });
+  const response = await adminAuthFetch<AuthAdminUser | { user: AuthAdminUser }>(
+    "/admin/users",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        email: input.email,
+        password: input.password,
+        email_confirm: true,
+        user_metadata: {
+          full_name: input.fullName,
+          phone: input.phone,
+          role,
+        },
+      }),
+    },
+  );
 
-  // Profile upsert via SDK (data API, works fine)
+  const user =
+    "user" in response && response.user
+      ? response.user
+      : (response as AuthAdminUser);
+
+  if (!user?.id) {
+    throw new Error(
+      `Auth API beklenen formatta yanıt vermedi: ${JSON.stringify(response).slice(0, 200)}`,
+    );
+  }
+
+  // The handle_new_user trigger has already inserted the profile row from
+  // user_metadata. Update it to make sure our values are authoritative.
   const supabase = getSupabaseAdminClient();
-  const { error: profileError } = await supabase.from("profiles").upsert({
-    id: user.id,
-    full_name: input.fullName,
-    phone: input.phone ?? null,
-    role,
-    is_active: true,
-  });
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .update({
+      full_name: input.fullName,
+      phone: input.phone ?? null,
+      role,
+      is_active: true,
+    })
+    .eq("id", user.id);
 
   if (profileError) {
-    throw profileError;
+    throw new Error(
+      `Profil güncellenemedi: ${profileError.message}${profileError.details ? ` (${profileError.details})` : ""}`,
+    );
   }
 
   return user;
