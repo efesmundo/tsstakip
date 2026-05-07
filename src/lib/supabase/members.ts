@@ -22,20 +22,31 @@ export async function createMemberAccount(input: CreateMemberInput) {
   const supabase = getSupabaseAdminClient();
   const role = input.role ?? "member";
 
-  const { data, error } = await supabase.auth.admin.createUser({
-    email: input.email,
-    password: input.password,
-    email_confirm: true,
-    user_metadata: {
-      full_name: input.fullName,
-      phone: input.phone,
-      role,
-    },
-  });
-
-  if (error) {
-    throw error;
+  let result;
+  try {
+    result = await supabase.auth.admin.createUser({
+      email: input.email,
+      password: input.password,
+      email_confirm: true,
+      user_metadata: {
+        full_name: input.fullName,
+        phone: input.phone,
+        role,
+      },
+    });
+  } catch (rawError) {
+    const message = rawError instanceof Error ? rawError.message : String(rawError);
+    if (message.includes("DOCTYPE") || message.includes("not valid JSON") || message.includes("<")) {
+      throw new Error(
+        "Supabase Auth admin API'si HTML hata sayfası döndürdü. Bu genelde SUPABASE_SERVICE_ROLE_KEY veya NEXT_PUBLIC_SUPABASE_URL'in yanlış olduğunu gösterir. Vercel env vars'larını kontrol edin (boşluk veya tırnak olmamalı) ve yeniden deploy edin.",
+      );
+    }
+    throw rawError;
   }
+
+  const { data, error } = result;
+  if (error) throw error;
+  if (!data.user) throw new Error("Auth API kullanıcı döndürmedi.");
 
   const userId = data.user.id;
   const { error: profileError } = await supabase.from("profiles").upsert({
