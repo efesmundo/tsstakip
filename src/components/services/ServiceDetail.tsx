@@ -80,6 +80,9 @@ export function ServiceDetail({
         <Card>
           <div className="flex flex-wrap items-start gap-2">
             <h2 className="flex-1 text-xl font-bold">{service.customer_name}</h2>
+            <span className="rounded-md bg-panel-muted px-2.5 py-1 text-sm font-semibold text-foreground/70">
+              {service.service_number}
+            </span>
             <StatusBadge status={service.status} />
           </div>
           <dl className="mt-4 divide-y divide-border text-sm">
