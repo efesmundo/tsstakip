@@ -15,11 +15,14 @@ export function ServiceGroup({
   baseHref,
 }: ServiceGroupProps) {
   return (
-    <details className="rounded-lg border border-border bg-panel" open>
-      <summary className="cursor-pointer px-4 py-3 text-base font-semibold">
-        {title} ({services.length})
-      </summary>
-      <div className="space-y-3 border-t border-border p-3">
+    <section className="overflow-hidden rounded-xl bg-panel" style={{ boxShadow: "var(--shadow-sm)" }}>
+      <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
+        <h2 className="font-semibold text-foreground">{title}</h2>
+        <span className="rounded-full bg-panel-muted px-2.5 py-0.5 text-xs font-semibold text-foreground/60">
+          {services.length}
+        </span>
+      </div>
+      <div className="p-3 space-y-2.5">
         {services.length ? (
           services.map((service) => (
             <ServiceCard
@@ -30,11 +33,11 @@ export function ServiceGroup({
             />
           ))
         ) : (
-          <p className="rounded-md bg-background px-3 py-6 text-center text-sm text-foreground/60">
+          <p className="rounded-lg bg-panel-muted px-3 py-8 text-center text-sm text-foreground/50">
             Bu grupta kayıt yok.
           </p>
         )}
       </div>
-    </details>
+    </section>
   );
 }

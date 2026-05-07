@@ -20,13 +20,13 @@ export function SignOutButton() {
 
   return (
     <button
-      className="inline-flex h-10 items-center gap-2 rounded-md border border-border bg-panel px-3 text-sm font-medium transition hover:bg-panel-muted disabled:cursor-not-allowed disabled:opacity-70"
+      className="flex h-9 items-center gap-1.5 rounded-md border border-white/30 bg-white/10 px-3 text-sm font-medium text-white transition hover:bg-white/20 disabled:opacity-60"
       disabled={isSigningOut}
       onClick={handleSignOut}
       type="button"
     >
-      <LogOut size={16} aria-hidden="true" />
-      {isSigningOut ? "Çıkılıyor..." : "Çıkış Yap"}
+      <LogOut size={15} aria-hidden="true" />
+      <span className="hidden sm:block">{isSigningOut ? "Çıkılıyor..." : "Çıkış"}</span>
     </button>
   );
 }

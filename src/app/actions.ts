@@ -195,12 +195,53 @@ export async function createProductGroupAction(formData: FormData) {
   revalidatePath("/admin/settings");
 }
 
+export async function updateProductGroupAction(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const id = text(formData, "id");
+  if (!id) return;
+  await supabase
+    .from("product_groups")
+    .update({ name: text(formData, "name") ?? "" })
+    .eq("id", id);
+  revalidatePath("/admin/settings");
+}
+
+export async function deleteProductGroupAction(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const id = text(formData, "id");
+  if (!id) return;
+  await supabase.from("product_groups").delete().eq("id", id);
+  revalidatePath("/admin/settings");
+}
+
 export async function createServiceTypeAction(formData: FormData) {
   const { supabase } = await requireAdmin();
   await supabase.from("service_types").insert({
     name: text(formData, "name") ?? "",
     product_group_id: text(formData, "product_group_id"),
   });
+  revalidatePath("/admin/settings");
+}
+
+export async function updateServiceTypeAction(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const id = text(formData, "id");
+  if (!id) return;
+  await supabase
+    .from("service_types")
+    .update({
+      name: text(formData, "name") ?? "",
+      product_group_id: text(formData, "product_group_id"),
+    })
+    .eq("id", id);
+  revalidatePath("/admin/settings");
+}
+
+export async function deleteServiceTypeAction(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const id = text(formData, "id");
+  if (!id) return;
+  await supabase.from("service_types").delete().eq("id", id);
   revalidatePath("/admin/settings");
 }
 
@@ -211,6 +252,29 @@ export async function createSubcontractorAction(formData: FormData) {
     contact_name: text(formData, "contact_name"),
     phone: text(formData, "phone"),
   });
+  revalidatePath("/admin/settings");
+}
+
+export async function updateSubcontractorAction(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const id = text(formData, "id");
+  if (!id) return;
+  await supabase
+    .from("subcontractors")
+    .update({
+      name: text(formData, "name") ?? "",
+      contact_name: text(formData, "contact_name"),
+      phone: text(formData, "phone"),
+    })
+    .eq("id", id);
+  revalidatePath("/admin/settings");
+}
+
+export async function deleteSubcontractorAction(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const id = text(formData, "id");
+  if (!id) return;
+  await supabase.from("subcontractors").delete().eq("id", id);
   revalidatePath("/admin/settings");
 }
 

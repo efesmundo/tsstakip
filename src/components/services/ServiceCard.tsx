@@ -21,34 +21,54 @@ export function ServiceCard({ service, lookup, href }: ServiceCardProps) {
 
   return (
     <Link
-      className="block rounded-lg border border-border bg-panel p-4 transition hover:border-accent/50 hover:bg-panel-muted"
+      className="block overflow-hidden rounded-xl bg-panel transition hover:-translate-y-0.5 hover:shadow-lg"
       href={href}
+      style={{ boxShadow: "var(--shadow-sm)" }}
     >
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-lg font-semibold">{service.customer_name}</h3>
-            <StatusBadge status={service.status} />
-            <PriorityBadge priority={service.priority} />
+      {/* Top accent bar for urgent */}
+      {service.priority === "urgent" ? (
+        <div className="h-1 w-full bg-accent" />
+      ) : null}
+
+      <div className="p-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-base font-semibold text-foreground">{service.customer_name}</h3>
+              <StatusBadge status={service.status} />
+              {service.priority !== "normal" ? (
+                <PriorityBadge priority={service.priority} />
+              ) : null}
+            </div>
+            <p className="mt-1 truncate text-sm text-foreground/60">
+              {service.address}{service.district ? ` · ${service.district}` : ""}
+            </p>
+
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              <Chip label={`Site: ${service.site_id}`} />
+              {product ? <Chip label={product} /> : null}
+              {type ? <Chip label={type} /> : null}
+              {service.project_name ? <Chip label={service.project_name} /> : null}
+            </div>
           </div>
-          <p className="mt-1 text-sm text-foreground/70">
-            {service.address} {service.district ? `- ${service.district}` : ""}
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2 text-xs">
-            <span className="rounded-md bg-background px-2 py-1">Site ID: {service.site_id}</span>
-            <span className="rounded-md bg-background px-2 py-1">Proje: {service.project_name ?? "-"}</span>
-            <span className="rounded-md bg-background px-2 py-1">Ürün: {product ?? "-"}</span>
-            <span className="rounded-md bg-background px-2 py-1">Tip: {type ?? "-"}</span>
+
+          <div className="shrink-0 text-sm md:text-right">
+            <p className="font-semibold text-foreground">{member?.full_name ?? "Üye atanmamış"}</p>
+            <p className="mt-0.5 text-foreground/55">{formatDateTime(service.scheduled_at)}</p>
+            <p className="mt-1.5 text-xs font-medium text-accent">
+              {feeLabels[service.fee_type]} · {formatCurrency(service.amount, service.currency)}
+            </p>
           </div>
-        </div>
-        <div className="min-w-44 text-sm md:text-right">
-          <p className="font-medium">{member?.full_name ?? "Üye yok"}</p>
-          <p className="text-foreground/65">{formatDateTime(service.scheduled_at)}</p>
-          <p className="mt-2 font-medium">
-            {feeLabels[service.fee_type]} · {formatCurrency(service.amount, service.currency)}
-          </p>
         </div>
       </div>
     </Link>
+  );
+}
+
+function Chip({ label }: { label: string }) {
+  return (
+    <span className="rounded-md bg-panel-muted px-2 py-0.5 text-xs text-foreground/65">
+      {label}
+    </span>
   );
 }

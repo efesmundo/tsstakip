@@ -15,6 +15,20 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "TSS Takip",
   description: "Admin ve üyeler için servis kayıt yönetim uygulaması.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "TSS Takip",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "default",
+    "apple-mobile-web-app-title": "TSS Takip",
+    "msapplication-TileColor": "#c62828",
+    "theme-color": "#c62828",
+  },
 };
 
 export default function RootLayout({
@@ -27,6 +41,11 @@ export default function RootLayout({
       lang="tr"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <link rel="apple-touch-icon" sizes="180x180" href="/icon.svg" />
+        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+        <meta name="theme-color" content="#c62828" />
+      </head>
       <body className="min-h-full">{children}</body>
     </html>
   );

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Plus } from "lucide-react";
 
 import { AppShell, adminNav } from "@/components/layout/AppShell";
 import { ServiceGroup } from "@/components/services/ServiceGroup";
@@ -34,39 +35,47 @@ export default async function AdminPage() {
   const completed = services.filter((item) => item.status === "completed");
   const urgent = services.filter((item) => item.priority === "urgent");
 
+  const stats = [
+    { label: "Bugün", value: todayServices.length, color: "text-accent" },
+    { label: "Onay Bekliyor", value: awaiting.length, color: "text-amber-600" },
+    { label: "Tamamlandı", value: completed.length, color: "text-emerald-600" },
+    { label: "Acil", value: urgent.length, color: "text-red-700" },
+  ];
+
   return (
     <AppShell
       nav={adminNav}
       subtitle="Tüm servis kayıtları, üyeler ve sistem ayarları"
-      title="Admin Dashboard"
-    >
-      <div className="mb-5 flex justify-end">
+      title="Dashboard"
+      actions={
         <Link
-          className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent-strong"
+          className="flex h-9 items-center gap-1.5 rounded-lg bg-white px-3 text-sm font-semibold text-accent shadow-sm transition hover:bg-white/90"
           href="/admin/services/new"
         >
+          <Plus size={16} aria-hidden="true" />
           Yeni Servis
         </Link>
-      </div>
-
-      <section className="grid gap-3 md:grid-cols-4">
-        {[
-          ["Bugün", todayServices.length],
-          ["Onay Bekliyor", awaiting.length],
-          ["Tamamlandı", completed.length],
-          ["Acil", urgent.length],
-        ].map(([label, value]) => (
-          <div className="rounded-lg border border-border bg-panel p-4" key={label}>
-            <p className="text-sm text-foreground/70">{label}</p>
-            <p className="mt-2 text-3xl font-semibold">{value}</p>
+      }
+    >
+      {/* Stats */}
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {stats.map(({ label, value, color }) => (
+          <div
+            className="rounded-xl bg-panel p-5"
+            key={label}
+            style={{ boxShadow: "var(--shadow-sm)" }}
+          >
+            <p className="text-sm font-medium text-foreground/60">{label}</p>
+            <p className={`mt-1.5 text-3xl font-bold ${color}`}>{value}</p>
           </div>
         ))}
       </section>
 
-      <section className="mt-6 space-y-4">
+      {/* Service groups */}
+      <section className="mt-5 space-y-4">
         <ServiceGroup baseHref="/admin/services" lookup={lookup} services={todayServices} title="Bugünün Servisleri" />
         <ServiceGroup baseHref="/admin/services" lookup={lookup} services={awaiting} title="Onay Bekleyen Servisler" />
-        <ServiceGroup baseHref="/admin/services" lookup={lookup} services={completed} title="Tamamlananlar" />
+        <ServiceGroup baseHref="/admin/services" lookup={lookup} services={urgent} title="Acil Servisler" />
       </section>
     </AppShell>
   );

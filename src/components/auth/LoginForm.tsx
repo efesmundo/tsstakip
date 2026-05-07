@@ -45,7 +45,7 @@ export function LoginForm() {
         .single();
 
       if (profileError) {
-        setError(`Profil okunamadi: ${profileError.message}`);
+        setError(`Profil okunamadı: ${profileError.message}`);
         return;
       }
 
@@ -64,29 +64,39 @@ export function LoginForm() {
 
   return (
     <form className="space-y-5" onSubmit={handleSubmit}>
-      <label className="block">
-        <span className="mb-2 block text-sm font-medium">E-posta</span>
-        <div className="flex h-12 items-center gap-3 rounded-md border border-border bg-background px-3">
-          <UserRound size={18} aria-hidden="true" />
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-foreground/80" htmlFor="email">
+          E-posta
+        </label>
+        <div
+          className="flex h-12 items-center gap-3 rounded-lg border border-border bg-panel-muted px-3 transition focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/15"
+        >
+          <UserRound className="text-foreground/40" size={18} aria-hidden="true" />
           <input
             autoComplete="email"
-            className="h-full w-full bg-transparent text-sm outline-none"
+            className="h-full w-full bg-transparent text-sm outline-none placeholder:text-foreground/35"
+            id="email"
             onChange={(event) => setEmail(event.target.value)}
-            placeholder="mete@apsiyon.com"
+            placeholder="ornek@sirket.com"
             required
             type="email"
             value={email}
           />
         </div>
-      </label>
+      </div>
 
-      <label className="block">
-        <span className="mb-2 block text-sm font-medium">Şifre</span>
-        <div className="flex h-12 items-center gap-3 rounded-md border border-border bg-background px-3">
-          <LockKeyhole size={18} aria-hidden="true" />
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-foreground/80" htmlFor="password">
+          Şifre
+        </label>
+        <div
+          className="flex h-12 items-center gap-3 rounded-lg border border-border bg-panel-muted px-3 transition focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/15"
+        >
+          <LockKeyhole className="text-foreground/40" size={18} aria-hidden="true" />
           <input
             autoComplete="current-password"
-            className="h-full w-full bg-transparent text-sm outline-none"
+            className="h-full w-full bg-transparent text-sm outline-none placeholder:text-foreground/35"
+            id="password"
             onChange={(event) => setPassword(event.target.value)}
             placeholder="••••••••"
             required
@@ -94,16 +104,16 @@ export function LoginForm() {
             value={password}
           />
         </div>
-      </label>
+      </div>
 
       {error ? (
-        <div className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
+        <div className="rounded-lg border border-danger/25 bg-danger/8 px-4 py-3 text-sm text-danger">
           {error}
         </div>
       ) : null}
 
       <button
-        className="h-12 w-full rounded-md bg-accent px-4 text-sm font-semibold text-white transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-70"
+        className="h-12 w-full rounded-lg bg-accent text-sm font-semibold text-white shadow-sm transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
         disabled={status === "loading"}
         type="submit"
       >

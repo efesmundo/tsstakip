@@ -9,37 +9,60 @@ type NavItem = {
 
 type AppShellProps = {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   nav: NavItem[];
   children: React.ReactNode;
+  actions?: React.ReactNode;
 };
 
-export function AppShell({ title, subtitle, nav, children }: AppShellProps) {
+export function AppShell({ title, subtitle, nav, children, actions }: AppShellProps) {
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-panel">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-4 md:flex-row md:items-center md:justify-between md:px-8">
-          <div>
-            <Link className="text-sm font-semibold text-accent-strong" href="/">
+      {/* Top App Bar */}
+      <header className="bg-accent text-white" style={{ boxShadow: "var(--shadow-md)" }}>
+        <div className="mx-auto flex max-w-7xl items-center gap-4 px-5 py-3 md:px-8">
+          <Link
+            className="flex items-center gap-2.5 text-white/90 transition hover:text-white"
+            href="/"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              alt="TSS Takip"
+              className="size-8 rounded-md"
+              src="/icon.svg"
+            />
+            <span className="hidden text-sm font-semibold tracking-wide sm:block">
               TSS Takip
-            </Link>
-            <h1 className="text-2xl font-semibold">{title}</h1>
-            <p className="text-sm text-foreground/65">{subtitle}</p>
+            </span>
+          </Link>
+
+          <div className="flex-1">
+            <h1 className="text-lg font-semibold leading-tight">{title}</h1>
+            {subtitle ? (
+              <p className="hidden text-xs text-white/70 sm:block">{subtitle}</p>
+            ) : null}
           </div>
+
+          {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
           <SignOutButton />
         </div>
-        <nav className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-5 pb-4 md:px-8">
-          {nav.map((item) => (
-            <Link
-              className="whitespace-nowrap rounded-md border border-border bg-background px-3 py-2 text-sm font-medium transition hover:bg-panel-muted"
-              href={item.href}
-              key={item.href}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+
+        {/* Navigation tabs */}
+        <div className="mx-auto max-w-7xl px-5 md:px-8">
+          <nav className="flex gap-1 overflow-x-auto pb-0">
+            {nav.map((item) => (
+              <Link
+                className="whitespace-nowrap border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-white/80 transition hover:border-white/50 hover:text-white"
+                href={item.href}
+                key={item.href}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
       </header>
+
       <div className="mx-auto max-w-7xl px-5 py-6 md:px-8">{children}</div>
     </main>
   );

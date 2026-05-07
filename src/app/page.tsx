@@ -1,68 +1,59 @@
-import { Camera, ClipboardList } from "lucide-react";
+import { ClipboardList, Shield, Users } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 import { LoginForm } from "@/components/auth/LoginForm";
 
+const features: [LucideIcon, string, string][] = [
+  [Shield, "Rol tabanlı erişim", "Admin ve üye ayrı paneller"],
+  [ClipboardList, "Tam kayıt takibi", "Servis durumu, fotoğraf ve zaman"],
+  [Users, "Ekip yönetimi", "Taşeron ve teknik ekip desteği"],
+];
+
 export default function Home() {
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <section className="mx-auto grid min-h-screen w-full max-w-6xl grid-cols-1 gap-8 px-5 py-6 md:grid-cols-[0.92fr_1.08fr] md:items-center md:px-8">
-        <div className="rounded-lg border border-border bg-panel p-6 shadow-sm">
+    <main className="min-h-screen bg-accent text-white">
+      <div className="mx-auto grid min-h-screen max-w-6xl grid-cols-1 gap-0 md:grid-cols-[1fr_1fr]">
+        {/* Left: Branding */}
+        <div className="flex flex-col justify-center px-8 py-12 md:px-12">
           <div className="mb-8 flex items-center gap-3">
-            <div className="flex size-11 items-center justify-center rounded-md bg-accent text-white">
-              <ClipboardList size={22} aria-hidden="true" />
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img alt="TSS Takip" className="size-14 rounded-2xl" src="/icon.svg" />
             <div>
-              <p className="text-sm font-medium text-accent-strong">TSS Takip</p>
-              <h1 className="text-2xl font-semibold">Servis Kayıt Yönetimi</h1>
+              <p className="text-sm font-medium text-white/70 uppercase tracking-widest">TSS Takip</p>
+              <h1 className="text-2xl font-bold leading-tight">Servis Kayıt Yönetimi</h1>
             </div>
           </div>
 
-          <LoginForm />
-        </div>
+          <h2 className="mb-6 max-w-sm text-4xl font-bold leading-tight md:text-5xl">
+            Saha servis süreçlerinizi tek noktadan yönetin.
+          </h2>
 
-        <div className="space-y-5">
-          <div>
-            <p className="text-sm font-medium text-accent-strong">
-              Web uygulaması başlangıcı hazır
-            </p>
-            <h2 className="mt-2 max-w-2xl text-3xl font-semibold leading-tight md:text-5xl">
-              Admin ve üye servis kayıtları tarayıcıdan yönetilecek.
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            {[
-              ["Bugün", "12"],
-              ["Onay Bekliyor", "4"],
-              ["Tamamlandı", "9"],
-              ["Acil", "2"],
-            ].map(([label, value]) => (
-              <div
-                className="rounded-lg border border-border bg-panel p-4"
-                key={label}
-              >
-                <p className="text-sm text-foreground/70">{label}</p>
-                <p className="mt-2 text-3xl font-semibold">{value}</p>
+          <div className="space-y-4">
+            {features.map(([Icon, title, desc]) => (
+              <div className="flex items-start gap-3" key={title}>
+                <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/15">
+                  <Icon size={18} aria-hidden="true" />
+                </div>
+                <div>
+                  <p className="font-semibold">{title}</p>
+                  <p className="text-sm text-white/65">{desc}</p>
+                </div>
               </div>
             ))}
           </div>
+        </div>
 
-          <div className="rounded-lg border border-border bg-panel p-5">
-            <div className="mb-4 flex items-center justify-between gap-4">
-              <div>
-                <h3 className="font-semibold">Kamera zorunlu fotoğraf akışı</h3>
-                <p className="text-sm text-foreground/70">
-                  Web sürümünde fotoğraf çekimi tarayıcı kamerası ile yapılacak.
-                </p>
-              </div>
-              <Camera className="text-accent-strong" size={24} aria-hidden="true" />
-            </div>
-            <div className="h-2 rounded-full bg-panel-muted">
-              <div className="h-2 w-2/3 rounded-full bg-accent" />
-            </div>
+        {/* Right: Login card */}
+        <div className="flex items-center justify-center bg-background px-6 py-12 text-foreground md:rounded-none md:px-12">
+          <div className="w-full max-w-sm">
+            <h2 className="mb-1 text-2xl font-bold text-foreground">Giriş Yap</h2>
+            <p className="mb-8 text-sm text-foreground/60">
+              Hesabınızla devam edin
+            </p>
+            <LoginForm />
           </div>
         </div>
-      </section>
+      </div>
     </main>
   );
 }

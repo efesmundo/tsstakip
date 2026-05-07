@@ -50,24 +50,22 @@ export function ServiceForm({
   const isAdmin = role === "admin";
 
   return (
-    <form action={action} className="space-y-6">
+    <form action={action} className="space-y-5">
       {service ? <input name="id" type="hidden" value={service.id} /> : null}
 
-      <section className="rounded-lg border border-border bg-panel p-4">
-        <h2 className="text-lg font-semibold">1. Müşteri</h2>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
+      <Section step="1" title="Müşteri Bilgileri">
+        <div className="grid gap-4 md:grid-cols-2">
           <Field label="Ad Soyad" name="customer_name" required value={service?.customer_name} />
           <Field label="Telefon" name="customer_phone" required value={service?.customer_phone} />
           <Field className="md:col-span-2" label="Adres" name="address" required value={service?.address} />
           <Field label="İlçe" name="district" value={service?.district} />
           <Field label="Site ID" name="site_id" required value={service?.site_id} />
-          <Field label="Proje Adı" name="project_name" value={service?.project_name} />
+          <Field className="md:col-span-2" label="Proje Adı" name="project_name" value={service?.project_name} />
         </div>
-      </section>
+      </Section>
 
-      <section className="rounded-lg border border-border bg-panel p-4">
-        <h2 className="text-lg font-semibold">2. Servis Detayı</h2>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
+      <Section step="2" title="Servis Detayı">
+        <div className="grid gap-4 md:grid-cols-2">
           <Select label="Ürün Grubu" name="product_group_id" value={service?.product_group_id}>
             <option value="">Seçiniz</option>
             {products.map((item) => (
@@ -86,7 +84,7 @@ export function ServiceForm({
             ))}
           </Select>
           <Field
-            label="Tarih ve Saat"
+            label="Planlanan Tarih / Saat"
             name="scheduled_at"
             type="datetime-local"
             value={inputDateTime(service?.scheduled_at)}
@@ -99,19 +97,18 @@ export function ServiceForm({
             </Select>
           ) : null}
           <label className="block md:col-span-2">
-            <span className="mb-2 block text-sm font-medium">Açıklama</span>
+            <span className="mb-1.5 block text-sm font-medium text-foreground/75">Açıklama</span>
             <textarea
-              className="min-h-28 w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none"
+              className="min-h-24 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/15"
               defaultValue={service?.description ?? ""}
               name="description"
             />
           </label>
         </div>
-      </section>
+      </Section>
 
-      <section className="rounded-lg border border-border bg-panel p-4">
-        <h2 className="text-lg font-semibold">3. Ekip ve Ücret</h2>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
+      <Section step="3" title="Ekip ve Ücret">
+        <div className="grid gap-4 md:grid-cols-2">
           {isAdmin ? (
             <Select label="Üye" name="member_id" value={service?.member_id}>
               <option value="">Seçiniz</option>
@@ -148,23 +145,33 @@ export function ServiceForm({
           <Field label="Garanti Kodu" name="warranty_code" value={service?.warranty_code} />
           <Field label="Garanti Bitiş Tarihi" name="warranty_expires_at" type="date" value={service?.warranty_expires_at} />
         </div>
-      </section>
+      </Section>
 
-      <section className="rounded-lg border border-border bg-panel p-4">
-        <h2 className="text-lg font-semibold">4. Özet ve SMS</h2>
-        <p className="mt-2 text-sm text-foreground/70">
-          Ücretli servislerde kayıt oluşturulduğunda durum Onay Bekliyor olur. Netgsm SMS entegrasyonu için API anahtarları eklendiğinde bu özet metin müşteriye gönderilecek.
+      <Section step="4" title="Özet">
+        <p className="text-sm text-foreground/65">
+          Ücretli servislerde kayıt oluşturulduğunda durum <strong>Onay Bekliyor</strong> olarak işaretlenir. Netgsm SMS entegrasyonu eklendiğinde onay metni müşteriye otomatik iletilecektir.
         </p>
-        <div className="mt-3 rounded-md bg-background p-3 text-sm text-foreground/75">
-          Sayın [Ad Soyad], [TUTAR] tutarında ücretli servis talebiniz oluşturulmuştur. Onaylamanız durumunda servisiniz planlanacak ve ekibimiz sizinle iletişime geçecektir.
-        </div>
-      </section>
+      </Section>
 
       <SubmitButton
         label={mode === "edit" ? "Servisi Güncelle" : "Servisi Kaydet"}
         pendingLabel={mode === "edit" ? "Güncelleniyor..." : "Kaydediliyor..."}
       />
     </form>
+  );
+}
+
+function Section({ step, title, children }: { step: string; title: string; children?: React.ReactNode }) {
+  return (
+    <div className="rounded-xl border border-border bg-panel p-5">
+      <div className="mb-4 flex items-center gap-2.5">
+        <span className="flex size-7 items-center justify-center rounded-full bg-accent text-xs font-bold text-white">
+          {step}
+        </span>
+        <h2 className="font-semibold text-foreground">{title}</h2>
+      </div>
+      {children}
+    </div>
   );
 }
 
@@ -185,9 +192,9 @@ function Field({
 }) {
   return (
     <label className={`block ${className}`}>
-      <span className="mb-2 block text-sm font-medium">{label}</span>
+      <span className="mb-1.5 block text-sm font-medium text-foreground/75">{label}</span>
       <input
-        className="h-11 w-full rounded-md border border-border bg-background px-3 text-sm outline-none"
+        className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/15"
         defaultValue={value ?? ""}
         name={name}
         required={required}
@@ -210,9 +217,9 @@ function Select({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-medium">{label}</span>
+      <span className="mb-1.5 block text-sm font-medium text-foreground/75">{label}</span>
       <select
-        className="h-11 w-full rounded-md border border-border bg-background px-3 text-sm outline-none"
+        className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/15"
         defaultValue={value ?? ""}
         name={name}
       >
