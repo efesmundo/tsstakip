@@ -12,12 +12,13 @@ export default async function MemberServiceDetailPage({
   const { id } = await params;
   const { supabase, user, profile } = await requireProfile();
 
-  const [service, products, types, subcontractors, photos] = await Promise.all([
+  const [service, products, types, subcontractors, photos, photoRules] = await Promise.all([
     supabase.from("services").select("*").eq("id", id).eq("member_id", user.id).single(),
     supabase.from("product_groups").select("*").eq("is_active", true).order("name"),
     supabase.from("service_types").select("*").eq("is_active", true).order("name"),
     supabase.from("subcontractors").select("*").eq("is_active", true).order("name"),
     supabase.from("service_photos").select("*").eq("service_id", id).order("taken_at", { ascending: false }),
+    supabase.from("photo_rules").select("gallery_upload_enabled").limit(1).maybeSingle(),
   ]);
 
   if (!service.data) notFound();
@@ -26,6 +27,7 @@ export default async function MemberServiceDetailPage({
     <>
       <PageHeader subtitle="Servis kaydı detayları" title="Servis Detayı" />
       <ServiceDetail
+        galleryEnabled={photoRules.data?.gallery_upload_enabled ?? false}
         members={[profile]}
         products={products.data ?? []}
         photos={photos.data ?? []}

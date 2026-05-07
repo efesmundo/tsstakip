@@ -39,6 +39,7 @@ type ServiceDetailProps = {
   subcontractors: Subcontractor[];
   photos: ServicePhoto[];
   role: "admin" | "member";
+  galleryEnabled?: boolean;
 };
 
 const statusActions: [string, string][] = [
@@ -56,6 +57,7 @@ export function ServiceDetail({
   subcontractors,
   photos,
   role,
+  galleryEnabled = true,
 }: ServiceDetailProps) {
   const product = products.find((item) => item.id === service.product_group_id);
   const type = serviceTypes.find((item) => item.id === service.service_type_id);
@@ -98,9 +100,9 @@ export function ServiceDetail({
         {/* Photos card */}
         <Card title="Fotoğraflar">
           <div className="space-y-3">
-            <PhotoCapture label="Başlangıç Fotoğrafı" photoType="start" serviceId={service.id} />
-            <PhotoCapture label="Bitiş Fotoğrafı" photoType="end" serviceId={service.id} />
-            <PhotoCapture label="Ara Fotoğraf" photoType="during" serviceId={service.id} />
+            <PhotoCapture galleryEnabled={galleryEnabled} label="Başlangıç Fotoğrafı" photoType="start" serviceId={service.id} />
+            <PhotoCapture galleryEnabled={galleryEnabled} label="Bitiş Fotoğrafı" photoType="end" serviceId={service.id} />
+            <PhotoCapture galleryEnabled={galleryEnabled} label="Ara Fotoğraf" photoType="during" serviceId={service.id} />
           </div>
           {photos.length > 0 ? (
             <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-3">
