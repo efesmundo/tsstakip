@@ -16,6 +16,7 @@ import {
   manageApiTokenAction,
   type TokenActionState,
 } from "@/app/api/v1/info/actions";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import type { ApiTokenRecord } from "@/lib/api-tokens";
 import { formatDateTime } from "@/lib/labels";
 
@@ -69,14 +70,14 @@ export function ApiTokenManager({ initialTokens }: ApiTokenManagerProps) {
 
       <form action={formAction}>
         <input name="intent" type="hidden" value="generate" />
-        <button
+        <SubmitButton
           className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-accent px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-strong disabled:opacity-60"
           disabled={isPending}
-          type="submit"
+          pendingLabel="Üretiliyor..."
         >
           <RefreshCw size={15} aria-hidden="true" />
           Token Üret
-        </button>
+        </SubmitButton>
       </form>
 
       <details className="overflow-hidden rounded-lg border border-border bg-background" open={tokens.length > 0}>
@@ -101,14 +102,14 @@ export function ApiTokenManager({ initialTokens }: ApiTokenManagerProps) {
                   <form action={formAction}>
                     <input name="intent" type="hidden" value="delete" />
                     <input name="token_id" type="hidden" value={token.id} />
-                    <button
+                    <SubmitButton
                       className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-danger/30 bg-danger/8 px-3 text-sm font-semibold text-danger transition hover:bg-danger/15 disabled:opacity-60"
                       disabled={isPending}
-                      type="submit"
+                      pendingLabel="Siliniyor..."
                     >
                       <Trash2 size={14} aria-hidden="true" />
                       Sil
-                    </button>
+                    </SubmitButton>
                   </form>
                 </div>
                 <TokenSecret preview={token.tokenPreview} token={token.tokenValue} />

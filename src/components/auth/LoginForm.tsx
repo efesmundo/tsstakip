@@ -1,6 +1,6 @@
 "use client";
 
-import { LockKeyhole, UserRound } from "lucide-react";
+import { Loader2, LockKeyhole, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -135,10 +135,13 @@ export function LoginForm() {
       ) : null}
 
       <button
-        className="h-12 w-full rounded-lg bg-accent text-sm font-semibold text-white shadow-sm transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-accent text-sm font-semibold text-white shadow-sm transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
         disabled={status === "loading"}
         type="submit"
       >
+        {status === "loading" ? (
+          <Loader2 className="animate-spin" size={16} aria-hidden="true" />
+        ) : null}
         {status === "loading" ? "Giriş yapılıyor..." : "Giriş Yap"}
       </button>
     </form>

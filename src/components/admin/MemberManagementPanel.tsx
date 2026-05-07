@@ -107,16 +107,18 @@ export function MemberManagementPanel({
                       <input className="h-4 w-4 accent-accent" defaultChecked={member.is_active} name="is_active" type="checkbox" />
                       Aktif
                     </label>
-                  <div className="flex gap-2">
-                      <button className="h-11 rounded-lg border border-border px-3 text-sm font-medium transition active:scale-95 hover:border-accent/40 hover:text-accent">
-                        Kaydet
-                      </button>
-                      <button
-                        className="h-11 rounded-lg border border-danger/30 bg-danger/8 px-3 text-sm font-medium text-danger transition active:scale-95 hover:bg-danger/15"
-                      formAction={deleteMemberAction}
-                      >
-                        Sil
-                      </button>
+                    <div className="flex gap-2">
+                      <SubmitButton
+                        className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-border px-3 text-sm font-medium transition active:scale-95 hover:border-accent/40 hover:text-accent disabled:opacity-60"
+                        label="Kaydet"
+                        pendingLabel="Kaydediliyor..."
+                      />
+                      <SubmitButton
+                        className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-danger/30 bg-danger/8 px-3 text-sm font-medium text-danger transition active:scale-95 hover:bg-danger/15 disabled:opacity-60"
+                        formAction={deleteMemberAction}
+                        label="Sil"
+                        pendingLabel="Siliniyor..."
+                      />
                     </div>
                   </div>
                 </form>

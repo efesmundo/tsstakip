@@ -9,6 +9,7 @@ import {
 import { PhotoCapture } from "@/components/services/PhotoCapture";
 import { ServiceForm } from "@/components/services/ServiceForm";
 import { StatusBadge } from "@/components/services/StatusBadge";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import type {
   ProductGroup,
   Profile,
@@ -175,14 +176,14 @@ export function ServiceDetail({
                       <input name="id" type="hidden" value={photo.id} />
                       <input name="service_id" type="hidden" value={service.id} />
                       <input name="storage_path" type="hidden" value={photo.storage_path} />
-                      <button
+                      <SubmitButton
                         aria-label="Fotoğrafı sil"
                         className="flex h-7 w-7 items-center justify-center rounded-md text-foreground/40 transition active:scale-90 hover:bg-danger/10 hover:text-danger"
+                        pendingLabel={null}
                         title="Fotoğrafı sil"
-                        type="submit"
                       >
                         <Trash2 size={13} aria-hidden="true" />
-                      </button>
+                      </SubmitButton>
                     </form>
                   </div>
                 </div>
@@ -202,17 +203,21 @@ export function ServiceDetail({
                 <form action={updateServiceStatusAction} key={status}>
                   <input name="id" type="hidden" value={service.id} />
                   <input name="status" type="hidden" value={status} />
-                  <button className="rounded-lg border border-border bg-panel px-4 py-2 text-sm font-medium text-foreground transition hover:border-accent/40 hover:bg-accent-surface hover:text-accent">
-                    {label}
-                  </button>
+                  <SubmitButton
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-panel px-4 py-2 text-sm font-medium text-foreground transition hover:border-accent/40 hover:bg-accent-surface hover:text-accent disabled:opacity-60"
+                    label={label}
+                    pendingLabel="Güncelleniyor..."
+                  />
                 </form>
               ))}
             </div>
             <form action={deleteServiceAction} className="mt-3 border-t border-border pt-3">
               <input name="id" type="hidden" value={service.id} />
-              <button className="rounded-lg border border-danger/30 bg-danger/8 px-4 py-2 text-sm font-medium text-danger transition hover:bg-danger/15">
-                Servisi Sil
-              </button>
+              <SubmitButton
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-danger/30 bg-danger/8 px-4 py-2 text-sm font-medium text-danger transition hover:bg-danger/15 disabled:opacity-60"
+                label="Servisi Sil"
+                pendingLabel="Siliniyor..."
+              />
             </form>
           </Card>
         ) : null}

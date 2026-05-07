@@ -68,12 +68,12 @@ export default async function SettingsPage() {
                   <option key={item.id} value={item.id}>{item.name}</option>
                 ))}
               </select>
-              <button
+              <SubmitButton
                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-accent text-white hover:bg-accent-strong"
-                type="submit"
+                pendingLabel={null}
               >
                 <Plus size={18} aria-hidden="true" />
-              </button>
+              </SubmitButton>
             </div>
           </form>
           <div className="mt-4 space-y-2">
@@ -138,13 +138,13 @@ export default async function SettingsPage() {
               name="phone"
               placeholder="Telefon"
             />
-            <button
+            <SubmitButton
               className="col-span-3 flex h-10 items-center justify-center gap-2 rounded-lg bg-accent text-sm font-semibold text-white hover:bg-accent-strong"
-              type="submit"
+              pendingLabel="Ekleniyor..."
             >
               <Plus size={16} aria-hidden="true" />
               Taşeron Ekle
-            </button>
+            </SubmitButton>
           </form>
           <div className="mt-4 space-y-2">
             {(subcontractors.data ?? []).length === 0 ? (
@@ -217,12 +217,12 @@ function AddForm({
         placeholder={placeholder}
         required
       />
-      <button
+      <SubmitButton
         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-accent text-white hover:bg-accent-strong"
-        type="submit"
+        pendingLabel={null}
       >
         <Plus size={18} aria-hidden="true" />
-      </button>
+      </SubmitButton>
     </form>
   );
 }
@@ -246,22 +246,21 @@ function ProductGroupRow({ item }: { item: ProductGroup }) {
           name="name"
           required
         />
-        <button
-          className="shrink-0 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:border-accent/40 hover:text-accent"
-          type="submit"
-        >
-          Kaydet
-        </button>
+        <SubmitButton
+          className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:border-accent/40 hover:text-accent disabled:opacity-60"
+          label="Kaydet"
+          pendingLabel="Kaydediliyor..."
+        />
       </form>
       <form action={deleteProductGroupAction}>
         <input name="id" type="hidden" value={item.id} />
-        <button
+        <SubmitButton
           className="flex h-8 w-8 items-center justify-center rounded-md text-foreground/40 hover:bg-danger/10 hover:text-danger"
+          pendingLabel={null}
           title="Sil"
-          type="submit"
         >
           <Trash2 size={15} aria-hidden="true" />
-        </button>
+        </SubmitButton>
       </form>
     </div>
   );
@@ -288,22 +287,21 @@ function ServiceTypeRow({ item, products }: { item: ServiceType; products: Produ
             <option key={p.id} value={p.id}>{p.name}</option>
           ))}
         </select>
-        <button
-          className="shrink-0 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:border-accent/40 hover:text-accent"
-          type="submit"
-        >
-          Kaydet
-        </button>
+        <SubmitButton
+          className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:border-accent/40 hover:text-accent disabled:opacity-60"
+          label="Kaydet"
+          pendingLabel="Kaydediliyor..."
+        />
       </form>
       <form action={deleteServiceTypeAction}>
         <input name="id" type="hidden" value={item.id} />
-        <button
+        <SubmitButton
           className="flex h-8 w-8 items-center justify-center rounded-md text-foreground/40 hover:bg-danger/10 hover:text-danger"
+          pendingLabel={null}
           title="Sil"
-          type="submit"
         >
           <Trash2 size={15} aria-hidden="true" />
-        </button>
+        </SubmitButton>
       </form>
     </div>
   );
@@ -332,22 +330,21 @@ function SubcontractorRow({ item }: { item: Subcontractor }) {
           name="phone"
           placeholder="Telefon"
         />
-        <button
-          className="shrink-0 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:border-accent/40 hover:text-accent"
-          type="submit"
-        >
-          Kaydet
-        </button>
+        <SubmitButton
+          className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:border-accent/40 hover:text-accent disabled:opacity-60"
+          label="Kaydet"
+          pendingLabel="Kaydediliyor..."
+        />
       </form>
       <form action={deleteSubcontractorAction}>
         <input name="id" type="hidden" value={item.id} />
-        <button
+        <SubmitButton
           className="flex h-8 w-8 items-center justify-center rounded-md text-foreground/40 hover:bg-danger/10 hover:text-danger"
+          pendingLabel={null}
           title="Sil"
-          type="submit"
         >
           <Trash2 size={15} aria-hidden="true" />
-        </button>
+        </SubmitButton>
       </form>
     </div>
   );

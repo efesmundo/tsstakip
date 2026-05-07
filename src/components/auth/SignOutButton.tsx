@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut } from "lucide-react";
+import { Loader2, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -25,7 +25,11 @@ export function SignOutButton() {
       onClick={handleSignOut}
       type="button"
     >
-      <LogOut size={15} aria-hidden="true" />
+      {isSigningOut ? (
+        <Loader2 className="animate-spin" size={15} aria-hidden="true" />
+      ) : (
+        <LogOut size={15} aria-hidden="true" />
+      )}
       <span className="hidden sm:block">{isSigningOut ? "Çıkılıyor..." : "Çıkış"}</span>
     </button>
   );

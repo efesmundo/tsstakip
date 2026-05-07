@@ -1,4 +1,5 @@
 import { PageHeader } from "@/components/layout/AppShell";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { requireAdmin } from "@/lib/auth";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -242,22 +243,22 @@ export default async function DebugPage({
               />
             </div>
             <div className="flex flex-wrap gap-2">
-              <button
-                className="h-11 flex-1 rounded-lg bg-accent px-4 text-sm font-semibold text-white"
+              <SubmitButton
+                className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg bg-accent px-4 text-sm font-semibold text-white disabled:opacity-60"
                 name="mode"
-                type="submit"
+                pendingLabel="Test ediliyor..."
                 value="sdk"
               >
                 SDK ile Test Et
-              </button>
-              <button
-                className="h-11 flex-1 rounded-lg border border-accent bg-panel px-4 text-sm font-semibold text-accent"
+              </SubmitButton>
+              <SubmitButton
+                className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-lg border border-accent bg-panel px-4 text-sm font-semibold text-accent disabled:opacity-60"
                 name="mode"
-                type="submit"
+                pendingLabel="Test ediliyor..."
                 value="fetch"
               >
                 Doğrudan POST ile Test Et
-              </button>
+              </SubmitButton>
             </div>
           </form>
 

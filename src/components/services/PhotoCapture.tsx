@@ -155,7 +155,11 @@ export function PhotoCapture({
               onClick={() => galleryInputRef.current?.click()}
               type="button"
             >
-              <ImageIcon size={15} aria-hidden="true" />
+              {isUploading ? (
+                <Loader2 className="animate-spin" size={15} aria-hidden="true" />
+              ) : (
+                <ImageIcon size={15} aria-hidden="true" />
+              )}
               Galeri
             </button>
           ) : null}
