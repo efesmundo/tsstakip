@@ -1,4 +1,5 @@
-import { KeyRound, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { Home, KeyRound, ShieldCheck } from "lucide-react";
 
 import { ApiTokenManager } from "@/components/api/ApiTokenManager";
 import { ApiInfoLoginForm } from "@/components/auth/ApiInfoLoginForm";
@@ -46,7 +47,16 @@ export default async function ApiInfoPage() {
             <p className="text-sm font-medium text-white/75">TSS Takip API</p>
             <h1 className="text-2xl font-bold">Servis Durum Callback</h1>
           </div>
-          <SignOutButton />
+          <div className="flex items-center gap-2">
+            <Link
+              className="inline-flex items-center gap-2 rounded-md border border-white/25 px-3 py-2 text-sm font-semibold text-white/90 transition hover:border-white/45 hover:bg-white/10 hover:text-white"
+              href="/admin"
+            >
+              <Home size={16} aria-hidden="true" />
+              Ana Sayfa
+            </Link>
+            <SignOutButton />
+          </div>
         </div>
       </header>
 

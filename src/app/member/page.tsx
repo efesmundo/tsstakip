@@ -45,7 +45,7 @@ export default async function MemberPage() {
           />
         }
         subtitle="Kendi servis taleplerinizi oluşturun ve takip edin"
-        title="Servislerim"
+        title={`Merhaba, ${profile.full_name}`}
       />
       <section className="space-y-4">
         <ServiceGroup baseHref="/member/services" lookup={lookup} services={active} title="Aktif Servislerim" />

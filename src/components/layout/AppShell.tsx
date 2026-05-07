@@ -91,7 +91,6 @@ export const adminNav: NavItem[] = [
   },
   { href: "/admin/reports", label: "Raporlar" },
   { href: "/admin/management", label: "Yönetim Paneli" },
-  { href: "/admin/settings", label: "Ayarlar" },
 ];
 
 export const memberNav: NavItem[] = [

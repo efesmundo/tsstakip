@@ -7,7 +7,7 @@ import { createLookup } from "@/lib/data";
 import { inRange, resolvePeriod } from "@/lib/reports";
 
 export default async function AdminPage() {
-  const { supabase } = await requireAdmin();
+  const { supabase, profile } = await requireAdmin();
   const [
     servicesResult,
     productsResult,
@@ -65,7 +65,7 @@ export default async function AdminPage() {
           />
         }
         subtitle="Tüm servis kayıtları, üyeler ve sistem ayarları"
-        title="Dashboard"
+        title={`Merhaba, ${profile.full_name}`}
       />
 
       <section className="grid gap-4 xl:grid-cols-[1fr_360px]">
