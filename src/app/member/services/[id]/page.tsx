@@ -1,6 +1,6 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-import { AppShell, memberNav } from "@/components/layout/AppShell";
+import { PageHeader } from "@/components/layout/AppShell";
 import { ServiceDetail } from "@/components/services/ServiceDetail";
 import { requireProfile } from "@/lib/auth";
 
@@ -11,7 +11,6 @@ export default async function MemberServiceDetailPage({
 }) {
   const { id } = await params;
   const { supabase, user, profile } = await requireProfile();
-  if (profile.role === "admin") redirect(`/admin/services/${id}`);
 
   const [service, products, types, subcontractors, photos] = await Promise.all([
     supabase.from("services").select("*").eq("id", id).eq("member_id", user.id).single(),
@@ -24,7 +23,8 @@ export default async function MemberServiceDetailPage({
   if (!service.data) notFound();
 
   return (
-    <AppShell nav={memberNav} subtitle="Servis kaydı detayları" title="Servis Detayı">
+    <>
+      <PageHeader subtitle="Servis kaydı detayları" title="Servis Detayı" />
       <ServiceDetail
         members={[profile]}
         products={products.data ?? []}
@@ -34,6 +34,6 @@ export default async function MemberServiceDetailPage({
         serviceTypes={types.data ?? []}
         subcontractors={subcontractors.data ?? []}
       />
-    </AppShell>
+    </>
   );
 }

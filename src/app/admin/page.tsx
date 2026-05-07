@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
-import { AppShell, adminNav } from "@/components/layout/AppShell";
+import { PageHeader } from "@/components/layout/AppShell";
 import { ServiceGroup } from "@/components/services/ServiceGroup";
 import { requireAdmin } from "@/lib/auth";
 import { createLookup } from "@/lib/data";
@@ -43,25 +43,25 @@ export default async function AdminPage() {
   ];
 
   return (
-    <AppShell
-      nav={adminNav}
-      subtitle="Tüm servis kayıtları, üyeler ve sistem ayarları"
-      title="Dashboard"
-      actions={
-        <Link
-          className="flex h-9 items-center gap-1.5 rounded-lg bg-white px-3 text-sm font-semibold text-accent shadow-sm transition hover:bg-white/90"
-          href="/admin/services/new"
-        >
-          <Plus size={16} aria-hidden="true" />
-          Yeni Servis
-        </Link>
-      }
-    >
-      {/* Stats */}
+    <>
+      <PageHeader
+        actions={
+          <Link
+            className="flex h-10 items-center gap-1.5 rounded-lg bg-accent px-4 text-sm font-semibold text-white shadow-sm transition active:scale-[0.97] hover:bg-accent-strong"
+            href="/admin/services/new"
+          >
+            <Plus size={16} aria-hidden="true" />
+            Yeni Servis
+          </Link>
+        }
+        subtitle="Tüm servis kayıtları, üyeler ve sistem ayarları"
+        title="Dashboard"
+      />
+
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map(({ label, value, color }) => (
           <div
-            className="rounded-xl bg-panel p-5"
+            className="rounded-xl bg-panel p-5 transition hover:-translate-y-0.5 hover:shadow-md"
             key={label}
             style={{ boxShadow: "var(--shadow-sm)" }}
           >
@@ -71,12 +71,11 @@ export default async function AdminPage() {
         ))}
       </section>
 
-      {/* Service groups */}
       <section className="mt-5 space-y-4">
         <ServiceGroup baseHref="/admin/services" lookup={lookup} services={todayServices} title="Bugünün Servisleri" />
         <ServiceGroup baseHref="/admin/services" lookup={lookup} services={awaiting} title="Onay Bekleyen Servisler" />
         <ServiceGroup baseHref="/admin/services" lookup={lookup} services={urgent} title="Acil Servisler" />
       </section>
-    </AppShell>
+    </>
   );
 }

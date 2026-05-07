@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
+import { cache } from "react";
 
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
-export async function getSessionProfile() {
+export const getSessionProfile = cache(async () => {
   const supabase = await getSupabaseServerClient();
   const {
     data: { user },
@@ -17,7 +18,7 @@ export async function getSessionProfile() {
     .single();
 
   return { supabase, user, profile };
-}
+});
 
 export async function requireProfile() {
   const session = await getSessionProfile();

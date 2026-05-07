@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { Plus } from "lucide-react";
 
-import { AppShell, adminNav } from "@/components/layout/AppShell";
+import { PageHeader } from "@/components/layout/AppShell";
 import { ServiceCard } from "@/components/services/ServiceCard";
 import { requireAdmin } from "@/lib/auth";
 import { createLookup } from "@/lib/data";
@@ -21,19 +22,34 @@ export default async function AdminServicesPage() {
     members: membersResult.data,
     subcontractors: subcontractorsResult.data,
   });
+  const services = servicesResult.data ?? [];
 
   return (
-    <AppShell nav={adminNav} subtitle="Tüm eklenen kayıtlar" title="Servisler">
-      <div className="mb-5 flex justify-end">
-        <Link className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white" href="/admin/services/new">
-          Yeni Servis
-        </Link>
+    <>
+      <PageHeader
+        actions={
+          <Link
+            className="flex h-10 items-center gap-1.5 rounded-lg bg-accent px-4 text-sm font-semibold text-white shadow-sm transition active:scale-[0.97] hover:bg-accent-strong"
+            href="/admin/services/new"
+          >
+            <Plus size={16} aria-hidden="true" />
+            Yeni Servis
+          </Link>
+        }
+        subtitle={`${services.length} servis kaydı`}
+        title="Servisler"
+      />
+      <div className="space-y-2.5">
+        {services.length === 0 ? (
+          <p className="rounded-xl bg-panel p-8 text-center text-sm text-foreground/50" style={{ boxShadow: "var(--shadow-sm)" }}>
+            Henüz servis kaydı yok.
+          </p>
+        ) : (
+          services.map((service) => (
+            <ServiceCard href={`/admin/services/${service.id}`} key={service.id} lookup={lookup} service={service} />
+          ))
+        )}
       </div>
-      <div className="space-y-3">
-        {(servicesResult.data ?? []).map((service) => (
-          <ServiceCard href={`/admin/services/${service.id}`} key={service.id} lookup={lookup} service={service} />
-        ))}
-      </div>
-    </AppShell>
+    </>
   );
 }

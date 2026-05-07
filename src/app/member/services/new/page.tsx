@@ -1,5 +1,5 @@
 import { createServiceAction } from "@/app/actions";
-import { AppShell, memberNav } from "@/components/layout/AppShell";
+import { PageHeader } from "@/components/layout/AppShell";
 import { ServiceForm } from "@/components/services/ServiceForm";
 import { requireProfile } from "@/lib/auth";
 
@@ -17,9 +17,10 @@ export default async function MemberNewServicePage({
   ]);
 
   return (
-    <AppShell nav={memberNav} subtitle="Yalnızca kendi adınıza servis kaydı açabilirsiniz" title="Yeni Servis Kaydı">
+    <>
+      <PageHeader subtitle="Yalnızca kendi adınıza servis kaydı açabilirsiniz" title="Yeni Servis Kaydı" />
       {error ? (
-        <div className="mb-4 rounded-md border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
+        <div className="mb-4 rounded-lg border border-danger/30 bg-danger/8 px-4 py-3 text-sm text-danger">
           {decodeURIComponent(error)}
         </div>
       ) : null}
@@ -32,6 +33,6 @@ export default async function MemberNewServicePage({
         serviceTypes={types.data ?? []}
         subcontractors={subcontractors.data ?? []}
       />
-    </AppShell>
+    </>
   );
 }

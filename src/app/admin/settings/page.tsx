@@ -13,7 +13,7 @@ import {
   updateServiceTypeAction,
   updateSubcontractorAction,
 } from "@/app/actions";
-import { AppShell, adminNav } from "@/components/layout/AppShell";
+import { PageHeader } from "@/components/layout/AppShell";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { requireAdmin } from "@/lib/auth";
 import { priorityLabels } from "@/lib/labels";
@@ -31,7 +31,8 @@ export default async function SettingsPage() {
     ]);
 
   return (
-    <AppShell nav={adminNav} subtitle="Ürün, servis tipi, öncelik, taşeron ve fotoğraf kuralları" title="Ayarlar">
+    <>
+      <PageHeader subtitle="Ürün, servis tipi, öncelik, taşeron ve fotoğraf kuralları" title="Ayarlar" />
       <div className="grid gap-5 lg:grid-cols-2">
 
         {/* Ürün Grupları */}
@@ -186,7 +187,7 @@ export default async function SettingsPage() {
           </form>
         </Panel>
       </div>
-    </AppShell>
+    </>
   );
 }
 

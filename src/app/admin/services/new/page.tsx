@@ -1,5 +1,5 @@
 import { createServiceAction } from "@/app/actions";
-import { AppShell, adminNav } from "@/components/layout/AppShell";
+import { PageHeader } from "@/components/layout/AppShell";
 import { ServiceForm } from "@/components/services/ServiceForm";
 import { requireAdmin } from "@/lib/auth";
 
@@ -18,9 +18,10 @@ export default async function AdminNewServicePage({
   ]);
 
   return (
-    <AppShell nav={adminNav} subtitle="4 adımlı servis kayıt formu" title="Yeni Servis">
+    <>
+      <PageHeader subtitle="4 adımlı servis kayıt formu" title="Yeni Servis" />
       {error ? (
-        <div className="mb-4 rounded-md border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
+        <div className="mb-4 rounded-lg border border-danger/30 bg-danger/8 px-4 py-3 text-sm text-danger">
           {decodeURIComponent(error)}
         </div>
       ) : null}
@@ -33,6 +34,6 @@ export default async function AdminNewServicePage({
         serviceTypes={types.data ?? []}
         subcontractors={subcontractors.data ?? []}
       />
-    </AppShell>
+    </>
   );
 }

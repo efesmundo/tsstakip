@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { AppShell, adminNav } from "@/components/layout/AppShell";
+import { PageHeader } from "@/components/layout/AppShell";
 import { ServiceDetail } from "@/components/services/ServiceDetail";
 import { requireAdmin } from "@/lib/auth";
 
@@ -23,7 +23,8 @@ export default async function AdminServiceDetailPage({
   if (!service.data) notFound();
 
   return (
-    <AppShell nav={adminNav} subtitle="Servis bilgileri ve düzenleme" title="Servis Detayı">
+    <>
+      <PageHeader subtitle="Servis bilgileri ve düzenleme" title="Servis Detayı" />
       <ServiceDetail
         members={members.data ?? []}
         products={products.data ?? []}
@@ -33,6 +34,6 @@ export default async function AdminServiceDetailPage({
         serviceTypes={types.data ?? []}
         subcontractors={subcontractors.data ?? []}
       />
-    </AppShell>
+    </>
   );
 }
