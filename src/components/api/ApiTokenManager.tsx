@@ -1,7 +1,7 @@
 "use client";
 
-import { KeyRound, RefreshCw, Trash2 } from "lucide-react";
-import { useActionState } from "react";
+import { Check, Copy, Eye, EyeOff, KeyRound, RefreshCw, Trash2 } from "lucide-react";
+import { useActionState, useState } from "react";
 
 import {
   manageApiTokenAction,
@@ -15,12 +15,22 @@ type ApiTokenManagerProps = {
 };
 
 export function ApiTokenManager({ initialTokenInfo }: ApiTokenManagerProps) {
+  const [isTokenVisible, setIsTokenVisible] = useState(false);
+  const [didCopy, setDidCopy] = useState(false);
   const initialState: TokenActionState = { tokenInfo: initialTokenInfo };
   const [state, formAction, isPending] = useActionState(
     manageApiTokenAction,
     initialState,
   );
   const tokenInfo = state.tokenInfo ?? null;
+  const maskedToken = state.token ? "•".repeat(Math.min(state.token.length, 48)) : "";
+
+  async function copyToken() {
+    if (!state.token) return;
+    await navigator.clipboard.writeText(state.token);
+    setDidCopy(true);
+    window.setTimeout(() => setDidCopy(false), 1800);
+  }
 
   return (
     <div className="space-y-4">
@@ -55,9 +65,39 @@ export function ApiTokenManager({ initialTokenInfo }: ApiTokenManagerProps) {
       {state.token ? (
         <div>
           <p className="text-sm font-semibold text-foreground">Yeni token</p>
-          <pre className="mt-2 overflow-x-auto rounded-lg border border-accent/25 bg-accent-surface p-3 text-sm text-foreground">
-            <code>{state.token}</code>
-          </pre>
+          <div className="mt-2 flex flex-col gap-2 rounded-lg border border-accent/25 bg-accent-surface p-3 sm:flex-row sm:items-center">
+            <code className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap font-mono text-sm text-foreground">
+              {isTokenVisible ? state.token : maskedToken}
+            </code>
+            <div className="flex gap-2">
+              <button
+                aria-label={isTokenVisible ? "Tokenı gizle" : "Tokenı göster"}
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-panel px-3 text-sm font-medium transition hover:border-accent/40 hover:text-accent"
+                onClick={() => setIsTokenVisible((current) => !current)}
+                type="button"
+              >
+                {isTokenVisible ? (
+                  <EyeOff size={15} aria-hidden="true" />
+                ) : (
+                  <Eye size={15} aria-hidden="true" />
+                )}
+                {isTokenVisible ? "Gizle" : "Göster"}
+              </button>
+              <button
+                aria-label="Tokenı kopyala"
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-accent px-3 text-sm font-semibold text-white transition hover:bg-accent-strong"
+                onClick={copyToken}
+                type="button"
+              >
+                {didCopy ? (
+                  <Check size={15} aria-hidden="true" />
+                ) : (
+                  <Copy size={15} aria-hidden="true" />
+                )}
+                {didCopy ? "Kopyalandı" : "Kopyala"}
+              </button>
+            </div>
+          </div>
         </div>
       ) : null}
 
