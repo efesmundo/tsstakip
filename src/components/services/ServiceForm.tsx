@@ -1,3 +1,4 @@
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import type {
   ProductGroup,
   Profile,
@@ -159,9 +160,10 @@ export function ServiceForm({
         </div>
       </section>
 
-      <button className="h-12 rounded-md bg-accent px-5 text-sm font-semibold text-white hover:bg-accent-strong">
-        {mode === "edit" ? "Servisi Güncelle" : "Servisi Kaydet"}
-      </button>
+      <SubmitButton
+        label={mode === "edit" ? "Servisi Güncelle" : "Servisi Kaydet"}
+        pendingLabel={mode === "edit" ? "Güncelleniyor..." : "Kaydediliyor..."}
+      />
     </form>
   );
 }

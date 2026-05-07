@@ -16,6 +16,18 @@ import type {
 } from "@/lib/data";
 import { feeLabels, formatCurrency, formatDateTime, priorityLabels } from "@/lib/labels";
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+
+function photoUrl(storagePath: string) {
+  return `${SUPABASE_URL}/storage/v1/object/public/service-photos/${storagePath}`;
+}
+
+const photoTypeLabels: Record<string, string> = {
+  start: "Başlangıç",
+  end: "Bitiş",
+  during: "Ara",
+};
+
 type ServiceDetailProps = {
   service: Service;
   products: ProductGroup[];
@@ -81,10 +93,24 @@ export function ServiceDetail({
           <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-3">
             {photos.length ? (
               photos.map((photo) => (
-                <div className="rounded-md border border-border bg-background p-2 text-xs" key={photo.id}>
-                  <p className="font-semibold">{photo.photo_type}</p>
-                  <p className="mt-1 break-all text-foreground/65">{photo.storage_path}</p>
-                </div>
+                <a
+                  className="group overflow-hidden rounded-md border border-border bg-background"
+                  href={photoUrl(photo.storage_path)}
+                  key={photo.id}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    alt={photoTypeLabels[photo.photo_type] ?? photo.photo_type}
+                    className="aspect-video w-full object-cover transition group-hover:opacity-90"
+                    loading="lazy"
+                    src={photoUrl(photo.storage_path)}
+                  />
+                  <p className="px-2 py-1 text-xs font-medium">
+                    {photoTypeLabels[photo.photo_type] ?? photo.photo_type}
+                  </p>
+                </a>
               ))
             ) : (
               <p className="col-span-full rounded-md bg-background px-3 py-6 text-center text-sm text-foreground/60">

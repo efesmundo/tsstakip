@@ -3,8 +3,13 @@ import { AppShell, adminNav } from "@/components/layout/AppShell";
 import { ServiceForm } from "@/components/services/ServiceForm";
 import { requireAdmin } from "@/lib/auth";
 
-export default async function AdminNewServicePage() {
+export default async function AdminNewServicePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const { supabase } = await requireAdmin();
+  const { error } = await searchParams;
   const [products, types, members, subcontractors] = await Promise.all([
     supabase.from("product_groups").select("*").eq("is_active", true).order("name"),
     supabase.from("service_types").select("*").eq("is_active", true).order("name"),
@@ -14,6 +19,11 @@ export default async function AdminNewServicePage() {
 
   return (
     <AppShell nav={adminNav} subtitle="4 adımlı servis kayıt formu" title="Yeni Servis">
+      {error ? (
+        <div className="mb-4 rounded-md border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
+          {decodeURIComponent(error)}
+        </div>
+      ) : null}
       <ServiceForm
         action={createServiceAction}
         members={members.data ?? []}

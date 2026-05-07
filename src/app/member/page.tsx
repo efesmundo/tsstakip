@@ -12,7 +12,7 @@ export default async function MemberPage() {
     redirect("/admin");
   }
 
-  const [servicesResult, productsResult, typesResult, membersResult] =
+  const [servicesResult, productsResult, typesResult] =
     await Promise.all([
       supabase
         .from("services")
@@ -21,14 +21,13 @@ export default async function MemberPage() {
         .order("created_at", { ascending: false }),
       supabase.from("product_groups").select("*").order("name"),
       supabase.from("service_types").select("*").order("name"),
-      supabase.from("profiles").select("*").eq("id", user.id),
     ]);
 
   const services = servicesResult.data ?? [];
   const lookup = createLookup({
     products: productsResult.data,
     types: typesResult.data,
-    members: membersResult.data,
+    members: [profile],
   });
   const active = services.filter((item) => item.status !== "completed");
   const completed = services.filter((item) => item.status === "completed");
