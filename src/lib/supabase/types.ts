@@ -250,6 +250,7 @@ export type Database = {
           name: string;
           token_hash: string;
           token_preview: string;
+          token_value: string | null;
           created_by: string | null;
           created_at: string;
           updated_at: string;
@@ -259,6 +260,7 @@ export type Database = {
           name: string;
           token_hash: string;
           token_preview: string;
+          token_value?: string | null;
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;

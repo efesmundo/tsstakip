@@ -3,7 +3,7 @@ import { KeyRound, ShieldCheck } from "lucide-react";
 import { ApiTokenManager } from "@/components/api/ApiTokenManager";
 import { ApiInfoLoginForm } from "@/components/auth/ApiInfoLoginForm";
 import { SignOutButton } from "@/components/auth/SignOutButton";
-import { getServiceStatusTokenInfo } from "@/lib/api-tokens";
+import { getServiceStatusTokens } from "@/lib/api-tokens";
 import { getSessionProfile } from "@/lib/auth";
 
 const endpoint = "/api/v1/service-status";
@@ -36,7 +36,7 @@ export default async function ApiInfoPage() {
     );
   }
 
-  const tokenInfo = await getServiceStatusTokenInfo().catch(() => null);
+  const tokens = await getServiceStatusTokens().catch(() => []);
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -53,7 +53,7 @@ export default async function ApiInfoPage() {
       <div className="mx-auto grid max-w-6xl gap-5 px-5 py-6 lg:grid-cols-[0.9fr_1.1fr]">
         <section className="space-y-4">
           <Card title="Bearer Token Yönetimi">
-            <ApiTokenManager initialTokenInfo={tokenInfo} />
+            <ApiTokenManager initialTokens={tokens} />
           </Card>
 
           <Card title="Endpoint">
@@ -71,7 +71,7 @@ export default async function ApiInfoPage() {
               <div>
                 <p className="text-sm font-semibold">Header ile bearer token gönderilir.</p>
                 <p className="mt-1 text-sm text-foreground/65">
-                  Token yukarıdaki bölümden üretilir. Silinen veya yeniden üretilen eski tokenlar geçersiz olur.
+                  Token yukarıdaki bölümden üretilir. Üretilen tokenlar silinene kadar geçerlidir.
                 </p>
               </div>
             </div>

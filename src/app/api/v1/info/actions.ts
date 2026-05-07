@@ -5,8 +5,8 @@ import { revalidatePath } from "next/cache";
 import {
   deleteServiceStatusToken,
   generateServiceStatusToken,
-  getServiceStatusTokenInfo,
-  type ApiTokenInfo,
+  getServiceStatusTokens,
+  type ApiTokenRecord,
 } from "@/lib/api-tokens";
 import { requireAdmin } from "@/lib/auth";
 
@@ -14,7 +14,7 @@ export type TokenActionState = {
   error?: string;
   message?: string;
   token?: string;
-  tokenInfo?: ApiTokenInfo | null;
+  tokens?: ApiTokenRecord[];
 };
 
 function formatError(error: unknown) {
@@ -30,25 +30,33 @@ export async function manageApiTokenAction(
 
   try {
     if (intent === "delete") {
-      await deleteServiceStatusToken();
+      const tokenId = formData.get("token_id");
+      if (typeof tokenId !== "string" || !tokenId) {
+        return {
+          error: "Silinecek token bulunamadı.",
+          tokens: await getServiceStatusTokens().catch(() => []),
+        };
+      }
+
+      await deleteServiceStatusToken(tokenId);
       revalidatePath("/api/v1/info");
       return {
-        message: "Bearer token silindi. API yeni token üretilene kadar authenticate olmayacak.",
-        tokenInfo: null,
+        message: "Bearer token silindi.",
+        tokens: await getServiceStatusTokens(),
       };
     }
 
-    const { token, info } = await generateServiceStatusToken(user.id);
+    const { token, tokens } = await generateServiceStatusToken(user.id);
     revalidatePath("/api/v1/info");
     return {
-      message: "Yeni bearer token üretildi. Bu değeri şimdi kaydedin; tekrar gösterilmeyecek.",
+      message: "Yeni bearer token üretildi.",
       token,
-      tokenInfo: info,
+      tokens,
     };
   } catch (error) {
     return {
       error: formatError(error),
-      tokenInfo: await getServiceStatusTokenInfo().catch(() => null),
+      tokens: await getServiceStatusTokens().catch(() => []),
     };
   }
 }

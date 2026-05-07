@@ -1,13 +1,14 @@
 import "server-only";
 
-import { createHash, randomBytes, timingSafeEqual } from "crypto";
+import { createHash, randomBytes, randomUUID, timingSafeEqual } from "crypto";
 
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 
-const SERVICE_STATUS_TOKEN_ID = "service-status";
-
-export type ApiTokenInfo = {
+export type ApiTokenRecord = {
+  id: string;
+  name: string;
   tokenPreview: string;
+  tokenValue: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -22,45 +23,41 @@ function compareHashes(a: string, b: string) {
   return aBuffer.length === bBuffer.length && timingSafeEqual(aBuffer, bBuffer);
 }
 
-export async function getServiceStatusTokenInfo(): Promise<ApiTokenInfo | null> {
+export async function getServiceStatusTokens(): Promise<ApiTokenRecord[]> {
   const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
     .from("api_tokens")
-    .select("token_preview,created_at,updated_at")
-    .eq("id", SERVICE_STATUS_TOKEN_ID)
-    .maybeSingle();
+    .select("id,name,token_preview,token_value,created_at,updated_at")
+    .order("created_at", { ascending: false });
 
   if (error) {
     throw error;
   }
 
-  if (!data) return null;
-
-  return {
-    tokenPreview: data.token_preview,
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
-  };
+  return (data ?? []).map((token) => ({
+    id: token.id,
+    name: token.name,
+    tokenPreview: token.token_preview,
+    tokenValue: token.token_value,
+    createdAt: token.created_at,
+    updatedAt: token.updated_at,
+  }));
 }
 
 export async function generateServiceStatusToken(createdBy: string) {
   const token = `tss_${randomBytes(32).toString("base64url")}`;
   const tokenPreview = `...${token.slice(-8)}`;
   const supabase = getSupabaseAdminClient();
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("api_tokens")
-    .upsert(
-      {
-        id: SERVICE_STATUS_TOKEN_ID,
-        name: "Service status callback",
-        token_hash: hashToken(token),
-        token_preview: tokenPreview,
-        created_by: createdBy,
-      },
-      { onConflict: "id" },
-    )
-    .select("token_preview,created_at,updated_at")
-    .single();
+    .insert({
+      id: randomUUID(),
+      name: "Service status callback",
+      token_hash: hashToken(token),
+      token_preview: tokenPreview,
+      token_value: token,
+      created_by: createdBy,
+    });
 
   if (error) {
     throw error;
@@ -68,20 +65,16 @@ export async function generateServiceStatusToken(createdBy: string) {
 
   return {
     token,
-    info: {
-      tokenPreview: data.token_preview,
-      createdAt: data.created_at,
-      updatedAt: data.updated_at,
-    },
+    tokens: await getServiceStatusTokens(),
   };
 }
 
-export async function deleteServiceStatusToken() {
+export async function deleteServiceStatusToken(tokenId: string) {
   const supabase = getSupabaseAdminClient();
   const { error } = await supabase
     .from("api_tokens")
     .delete()
-    .eq("id", SERVICE_STATUS_TOKEN_ID);
+    .eq("id", tokenId);
 
   if (error) {
     throw error;
@@ -92,13 +85,15 @@ export async function validateServiceStatusBearer(token: string | null) {
   if (!token) return false;
 
   const supabase = getSupabaseAdminClient();
+  const tokenHash = hashToken(token);
   const { data, error } = await supabase
     .from("api_tokens")
     .select("token_hash")
-    .eq("id", SERVICE_STATUS_TOKEN_ID)
+    .eq("token_hash", tokenHash)
+    .limit(1)
     .maybeSingle();
 
   if (error || !data) return false;
 
-  return compareHashes(hashToken(token), data.token_hash);
+  return compareHashes(tokenHash, data.token_hash);
 }
