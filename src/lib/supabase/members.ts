@@ -18,6 +18,22 @@ type UpdateMemberInput = {
   isActive?: boolean;
 };
 
+function isHtmlResponseError(message: string): boolean {
+  return (
+    message.includes("DOCTYPE") ||
+    message.includes("not valid JSON") ||
+    message.includes("Unexpected token '<'") ||
+    message.includes("<html")
+  );
+}
+
+const HTML_ERROR_HINT =
+  "Supabase Auth admin API'si JSON yerine HTML döndürdü. Sebepler: " +
+  "(1) SUPABASE_SERVICE_ROLE_KEY yanlış kopyalanmış (anon key ile karıştırılmış olabilir), " +
+  "(2) NEXT_PUBLIC_SUPABASE_URL hatalı, " +
+  "(3) Supabase projesi pause durumunda (free tier 1 hafta inaktiflik sonrası pause olur) — Supabase Dashboard'dan 'Restore project' tuşu ile uyandırın, " +
+  "(4) Vercel'e env eklendi ama redeploy yapılmadı.";
+
 export async function createMemberAccount(input: CreateMemberInput) {
   const supabase = getSupabaseAdminClient();
   const role = input.role ?? "member";
@@ -36,16 +52,19 @@ export async function createMemberAccount(input: CreateMemberInput) {
     });
   } catch (rawError) {
     const message = rawError instanceof Error ? rawError.message : String(rawError);
-    if (message.includes("DOCTYPE") || message.includes("not valid JSON") || message.includes("<")) {
-      throw new Error(
-        "Supabase Auth admin API'si HTML hata sayfası döndürdü. Bu genelde SUPABASE_SERVICE_ROLE_KEY veya NEXT_PUBLIC_SUPABASE_URL'in yanlış olduğunu gösterir. Vercel env vars'larını kontrol edin (boşluk veya tırnak olmamalı) ve yeniden deploy edin.",
-      );
+    if (isHtmlResponseError(message)) {
+      throw new Error(HTML_ERROR_HINT);
     }
     throw rawError;
   }
 
   const { data, error } = result;
-  if (error) throw error;
+  if (error) {
+    if (isHtmlResponseError(error.message)) {
+      throw new Error(HTML_ERROR_HINT);
+    }
+    throw error;
+  }
   if (!data.user) throw new Error("Auth API kullanıcı döndürmedi.");
 
   const userId = data.user.id;
