@@ -18,29 +18,62 @@ type UpdateMemberInput = {
   isActive?: boolean;
 };
 
-function isHtmlResponseError(message: string): boolean {
-  return (
-    message.includes("DOCTYPE") ||
-    message.includes("not valid JSON") ||
-    message.includes("Unexpected token '<'") ||
-    message.includes("<html")
-  );
+function getAuthEndpoint() {
+  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim().replace(/\/$/, "");
+  const secret = (
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    process.env.SUPABASE_SECRET_KEY ??
+    ""
+  ).trim();
+  if (!url || !secret) {
+    throw new Error("Supabase URL veya service role key eksik. Vercel env vars kontrol edin.");
+  }
+  return { url, secret };
 }
 
-const HTML_ERROR_HINT =
-  "Supabase Auth admin API'si JSON yerine HTML döndürdü. Sebepler: " +
-  "(1) SUPABASE_SERVICE_ROLE_KEY yanlış kopyalanmış (anon key ile karıştırılmış olabilir), " +
-  "(2) NEXT_PUBLIC_SUPABASE_URL hatalı, " +
-  "(3) Supabase projesi pause durumunda (free tier 1 hafta inaktiflik sonrası pause olur) — Supabase Dashboard'dan 'Restore project' tuşu ile uyandırın, " +
-  "(4) Vercel'e env eklendi ama redeploy yapılmadı.";
+async function adminAuthFetch<T>(path: string, init: RequestInit): Promise<T> {
+  const { url, secret } = getAuthEndpoint();
+  const response = await fetch(`${url}/auth/v1${path}`, {
+    ...init,
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${secret}`,
+      apikey: secret,
+      ...(init.headers ?? {}),
+    },
+  });
+
+  const text = await response.text();
+  if (!response.ok) {
+    let detail = text.slice(0, 300);
+    try {
+      const parsed = JSON.parse(text) as { msg?: string; message?: string; error?: string };
+      detail = parsed.msg ?? parsed.message ?? parsed.error ?? detail;
+    } catch {
+      // keep raw text
+    }
+    throw new Error(`Supabase Auth ${response.status}: ${detail}`);
+  }
+
+  if (!text) return undefined as T;
+  return JSON.parse(text) as T;
+}
+
+type AuthAdminUser = {
+  id: string;
+  email?: string;
+  phone?: string;
+};
 
 export async function createMemberAccount(input: CreateMemberInput) {
-  const supabase = getSupabaseAdminClient();
   const role = input.role ?? "member";
 
-  let result;
-  try {
-    result = await supabase.auth.admin.createUser({
+  // Direct fetch — supabase-js v2.105.3 has a bug in auth.admin.createUser
+  // that returns HTML parse errors. Using REST endpoint directly works.
+  const user = await adminAuthFetch<AuthAdminUser>("/admin/users", {
+    method: "POST",
+    body: JSON.stringify({
       email: input.email,
       password: input.password,
       email_confirm: true,
@@ -49,27 +82,13 @@ export async function createMemberAccount(input: CreateMemberInput) {
         phone: input.phone,
         role,
       },
-    });
-  } catch (rawError) {
-    const message = rawError instanceof Error ? rawError.message : String(rawError);
-    if (isHtmlResponseError(message)) {
-      throw new Error(HTML_ERROR_HINT);
-    }
-    throw rawError;
-  }
+    }),
+  });
 
-  const { data, error } = result;
-  if (error) {
-    if (isHtmlResponseError(error.message)) {
-      throw new Error(HTML_ERROR_HINT);
-    }
-    throw error;
-  }
-  if (!data.user) throw new Error("Auth API kullanıcı döndürmedi.");
-
-  const userId = data.user.id;
+  // Profile upsert via SDK (data API, works fine)
+  const supabase = getSupabaseAdminClient();
   const { error: profileError } = await supabase.from("profiles").upsert({
-    id: userId,
+    id: user.id,
     full_name: input.fullName,
     phone: input.phone ?? null,
     role,
@@ -80,7 +99,7 @@ export async function createMemberAccount(input: CreateMemberInput) {
     throw profileError;
   }
 
-  return data.user;
+  return user;
 }
 
 export async function updateMemberProfile(userId: string, input: UpdateMemberInput) {
@@ -107,10 +126,8 @@ export async function updateMemberProfile(userId: string, input: UpdateMemberInp
 }
 
 export async function deleteMemberAccount(userId: string) {
-  const supabase = getSupabaseAdminClient();
-  const { error } = await supabase.auth.admin.deleteUser(userId);
-
-  if (error) {
-    throw error;
-  }
+  // Direct fetch — same bug as createUser in supabase-js v2.105.3
+  await adminAuthFetch(`/admin/users/${encodeURIComponent(userId)}`, {
+    method: "DELETE",
+  });
 }
