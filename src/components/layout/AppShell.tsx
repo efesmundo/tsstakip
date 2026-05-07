@@ -6,6 +6,7 @@ import { NavLink } from "@/components/layout/NavLink";
 export type NavItem = {
   href: string;
   label: string;
+  children?: NavItem[];
 };
 
 type AppHeaderProps = {
@@ -16,8 +17,8 @@ export function AppHeader({ nav }: AppHeaderProps) {
   const homeHref = nav[0]?.href ?? "/";
 
   return (
-    <header className="sticky top-0 z-30 bg-accent text-white" style={{ boxShadow: "var(--shadow-md)" }}>
-      <div className="mx-auto flex max-w-7xl items-center gap-4 px-5 py-3 md:px-8">
+    <aside className="bg-accent text-white md:sticky md:top-0 md:flex md:h-screen md:w-64 md:shrink-0 md:flex-col" style={{ boxShadow: "var(--shadow-md)" }}>
+      <div className="flex items-center gap-4 px-5 py-4">
         <Link
           className="flex items-center gap-2.5 text-white/90 transition hover:text-white"
           href={homeHref}
@@ -31,19 +32,34 @@ export function AppHeader({ nav }: AppHeaderProps) {
 
         <div className="flex-1" />
 
-        <SignOutButton />
+        <div className="md:hidden">
+          <SignOutButton />
+        </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-5 md:px-8">
-        <nav className="flex gap-1 overflow-x-auto">
-          {nav.map((item) => (
-            <NavLink href={item.href} key={item.href}>
+      <nav className="flex gap-1 overflow-x-auto px-3 pb-3 md:flex-1 md:flex-col md:overflow-y-auto md:px-3 md:py-2">
+        {nav.map((item) => (
+          <div key={item.href}>
+            <NavLink href={item.href}>
               {item.label}
             </NavLink>
-          ))}
-        </nav>
+            {item.children?.length ? (
+              <div className="mt-1 space-y-1 border-l border-white/15 pl-3 md:ml-4">
+                {item.children.map((child) => (
+                  <NavLink href={child.href} key={child.href} nested exact>
+                    {child.label}
+                  </NavLink>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ))}
+      </nav>
+
+      <div className="hidden border-t border-white/15 p-3 md:block">
+        <SignOutButton />
       </div>
-    </header>
+    </aside>
   );
 }
 
@@ -69,14 +85,26 @@ export function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
 
 export const adminNav: NavItem[] = [
   { href: "/admin", label: "Dashboard" },
-  { href: "/admin/services", label: "Servisler" },
-  { href: "/admin/services/new", label: "Yeni Servis" },
+  {
+    href: "/admin/services",
+    label: "Servisler",
+    children: [
+      { href: "/admin/services", label: "Servis Listesi" },
+      { href: "/admin/services/new", label: "Yeni Servis" },
+    ],
+  },
   { href: "/admin/reports", label: "Raporlar" },
   { href: "/admin/members", label: "Üyeler" },
   { href: "/admin/settings", label: "Ayarlar" },
 ];
 
 export const memberNav: NavItem[] = [
-  { href: "/member", label: "Servislerim" },
-  { href: "/member/services/new", label: "Yeni Servis Kaydı" },
+  {
+    href: "/member",
+    label: "Servislerim",
+    children: [
+      { href: "/member", label: "Servis Listesi" },
+      { href: "/member/services/new", label: "Yeni Servis Kaydı" },
+    ],
+  },
 ];
