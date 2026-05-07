@@ -193,7 +193,7 @@ export default async function DebugPage({
           <form action={runCreateUserTestAction} className="grid gap-2 md:grid-cols-[1fr_1fr_auto]">
             <input
               className="h-11 rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-accent"
-              defaultValue={`test-${Date.now()}@example.com`}
+              placeholder="test@example.com"
               name="email"
               type="email"
               required
@@ -228,8 +228,8 @@ export default async function DebugPage({
         <p className="font-semibold text-amber-900">Yorum rehberi</p>
         <ul className="mt-2 list-disc space-y-1 pl-5 text-amber-900/80">
           <li>Test sonucu <code>userId</code> içeriyorsa: createUser çalışıyor, üye ekleme aksiyonunda başka bir bug var.</li>
-          <li>Sonuç <code>error: {`{`}message...{`}`}</code> içeriyorsa: Supabase'in döndüğü gerçek hata.</li>
-          <li>Sonuç <code>thrown: true</code> içeriyorsa: client/parse seviyesinde patlama. <code>message</code> bize sebebi söyler.</li>
+          <li>Sonuç <code>error: &#123;message...&#125;</code> içeriyorsa: Supabase&apos;in döndüğü gerçek hata.</li>
+          <li>Sonuç <code>thrown: true</code> içeriyorsa: client/parse seviyesinde patlama. <code>message</code> alanı bize sebebi söyler.</li>
         </ul>
       </section>
     </>
