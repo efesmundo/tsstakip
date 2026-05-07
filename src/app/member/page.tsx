@@ -1,15 +1,14 @@
-import Link from "next/link";
-import { Plus } from "lucide-react";
-
+import { createServiceAction } from "@/app/actions";
 import { PageHeader } from "@/components/layout/AppShell";
 import { ServiceGroup } from "@/components/services/ServiceGroup";
+import { ServiceCreateModal } from "@/components/services/ServiceCreateModal";
 import { requireProfile } from "@/lib/auth";
 import { createLookup } from "@/lib/data";
 
 export default async function MemberPage() {
   const { supabase, user, profile } = await requireProfile();
 
-  const [servicesResult, productsResult, typesResult] =
+  const [servicesResult, productsResult, typesResult, subcontractorsResult] =
     await Promise.all([
       supabase
         .from("services")
@@ -18,6 +17,7 @@ export default async function MemberPage() {
         .order("created_at", { ascending: false }),
       supabase.from("product_groups").select("*").order("name"),
       supabase.from("service_types").select("*").order("name"),
+      supabase.from("subcontractors").select("*").eq("is_active", true).order("name"),
     ]);
 
   const services = servicesResult.data ?? [];
@@ -33,13 +33,16 @@ export default async function MemberPage() {
     <>
       <PageHeader
         actions={
-          <Link
-            className="flex h-10 items-center gap-1.5 rounded-lg bg-accent px-4 text-sm font-semibold text-white shadow-sm transition active:scale-[0.97] hover:bg-accent-strong"
-            href="/member/services/new"
-          >
-            <Plus size={16} aria-hidden="true" />
-            Yeni Kayıt
-          </Link>
+          <ServiceCreateModal
+            action={createServiceAction}
+            buttonLabel="Yeni Kayıt"
+            members={[]}
+            products={productsResult.data ?? []}
+            role="member"
+            serviceTypes={typesResult.data ?? []}
+            subcontractors={subcontractorsResult.data ?? []}
+            title="Yeni Servis Kaydı"
+          />
         }
         subtitle="Kendi servis taleplerinizi oluşturun ve takip edin"
         title="Servislerim"

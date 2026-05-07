@@ -1,8 +1,7 @@
-import Link from "next/link";
-import { Plus } from "lucide-react";
-
+import { createServiceAction } from "@/app/actions";
 import { PageHeader } from "@/components/layout/AppShell";
 import { ServiceGroup } from "@/components/services/ServiceGroup";
+import { ServiceCreateModal } from "@/components/services/ServiceCreateModal";
 import { requireAdmin } from "@/lib/auth";
 import { createLookup } from "@/lib/data";
 import { inRange, resolvePeriod } from "@/lib/reports";
@@ -47,13 +46,16 @@ export default async function AdminPage() {
     <>
       <PageHeader
         actions={
-          <Link
-            className="flex h-10 items-center gap-1.5 rounded-lg bg-accent px-4 text-sm font-semibold text-white shadow-sm transition active:scale-[0.97] hover:bg-accent-strong"
-            href="/admin/services/new"
-          >
-            <Plus size={16} aria-hidden="true" />
-            Yeni Servis
-          </Link>
+          <ServiceCreateModal
+            action={createServiceAction}
+            buttonLabel="Yeni Servis"
+            members={membersResult.data ?? []}
+            products={productsResult.data ?? []}
+            role="admin"
+            serviceTypes={typesResult.data ?? []}
+            subcontractors={subcontractorsResult.data ?? []}
+            title="Yeni Servis"
+          />
         }
         subtitle="Tüm servis kayıtları, üyeler ve sistem ayarları"
         title="Dashboard"

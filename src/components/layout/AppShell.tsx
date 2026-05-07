@@ -90,7 +90,6 @@ export const adminNav: NavItem[] = [
     label: "Servisler",
     children: [
       { href: "/admin/services", label: "Servis Listesi" },
-      { href: "/admin/services/new", label: "Yeni Servis" },
     ],
   },
   { href: "/admin/reports", label: "Raporlar" },
@@ -104,7 +103,6 @@ export const memberNav: NavItem[] = [
     label: "Servislerim",
     children: [
       { href: "/member", label: "Servis Listesi" },
-      { href: "/member/services/new", label: "Yeni Servis Kaydı" },
     ],
   },
 ];
