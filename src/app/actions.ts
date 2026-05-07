@@ -172,26 +172,37 @@ export async function deleteServicePhotoAction(formData: FormData) {
 
 export async function createMemberAction(formData: FormData) {
   await requireAdmin();
-  await createMemberAccount({
-    email: text(formData, "email") ?? "",
-    password: text(formData, "password") ?? "",
-    fullName: text(formData, "full_name") ?? "",
-    phone: text(formData, "phone") ?? undefined,
-    role: (text(formData, "role") ?? "member") as UserRole,
-  });
+  try {
+    await createMemberAccount({
+      email: text(formData, "email") ?? "",
+      password: text(formData, "password") ?? "",
+      fullName: text(formData, "full_name") ?? "",
+      phone: text(formData, "phone") ?? undefined,
+      role: (text(formData, "role") ?? "member") as UserRole,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Bilinmeyen hata";
+    redirect(`/admin/members?error=${encodeURIComponent(message)}`);
+  }
   revalidatePath("/admin/members");
+  redirect("/admin/members?ok=1");
 }
 
 export async function updateMemberAction(formData: FormData) {
   await requireAdmin();
   const id = text(formData, "id");
   if (!id) return;
-  await updateMemberProfile(id, {
-    fullName: text(formData, "full_name") ?? undefined,
-    phone: text(formData, "phone"),
-    role: (text(formData, "role") ?? "member") as UserRole,
-    isActive: bool(formData, "is_active"),
-  });
+  try {
+    await updateMemberProfile(id, {
+      fullName: text(formData, "full_name") ?? undefined,
+      phone: text(formData, "phone"),
+      role: (text(formData, "role") ?? "member") as UserRole,
+      isActive: bool(formData, "is_active"),
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Bilinmeyen hata";
+    redirect(`/admin/members?error=${encodeURIComponent(message)}`);
+  }
   revalidatePath("/admin/members");
 }
 
@@ -199,7 +210,12 @@ export async function deleteMemberAction(formData: FormData) {
   await requireAdmin();
   const id = text(formData, "id");
   if (!id) return;
-  await deleteMemberAccount(id);
+  try {
+    await deleteMemberAccount(id);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Bilinmeyen hata";
+    redirect(`/admin/members?error=${encodeURIComponent(message)}`);
+  }
   revalidatePath("/admin/members");
 }
 
