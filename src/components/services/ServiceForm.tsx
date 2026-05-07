@@ -178,20 +178,12 @@ export function ServiceForm({
           </Select>
           <Field label="Tutar" name="amount" type="number" value={service?.amount?.toString()} />
           <Field label="Para Birimi" name="currency" value={service?.currency ?? "TRY"} />
-          <Select label="Ödeme Durumu" name="payment_status" value={service?.payment_status}>
-            <option value="">Seçiniz</option>
-            <option value="pending">Bekliyor</option>
-            <option value="paid">Ödendi</option>
-            <option value="partial">Kısmi</option>
-          </Select>
-          <Field label="Garanti Kodu" name="warranty_code" value={service?.warranty_code} />
-          <Field label="Garanti Bitiş Tarihi" name="warranty_expires_at" type="date" value={service?.warranty_expires_at} />
         </div>
       </Section>
 
       <Section step="4" title="Özet">
         <p className="text-sm text-foreground/65">
-          Ücretli servislerde kayıt oluşturulduğunda durum <strong>Onay Bekliyor</strong> olarak işaretlenir. Netgsm SMS entegrasyonu eklendiğinde onay metni müşteriye otomatik iletilecektir.
+          Ücretsiz servisler doğrudan <strong>Onaylandı</strong> olarak açılır. Ücretli servislerde kayıt oluşturulduğunda durum <strong>Onay Bekliyor</strong> olarak işaretlenir.
         </p>
       </Section>
 

@@ -49,6 +49,15 @@ const statusActions: [string, string][] = [
   ["rejected", "Reddet"],
 ];
 
+function photoDisabledReason(role: "admin" | "member", status: Service["status"], photoType: "start" | "end" | "during") {
+  if (role === "admin") return undefined;
+  if (status === "rejected" || status === "canceled") return "Bu servis için fotoğraf eklenemez.";
+  if (photoType === "start" && status !== "approved") return "Başlangıç fotoğrafı için servis onaylanmış olmalı.";
+  if (photoType === "end" && status !== "in_progress") return "Bitiş fotoğrafı için servis başlamış olmalı.";
+  if (photoType === "during" && status !== "in_progress") return "Ara fotoğraf için servis başlamış olmalı.";
+  return undefined;
+}
+
 export function ServiceDetail({
   service,
   products,
@@ -109,9 +118,30 @@ export function ServiceDetail({
         {/* Photos card */}
         <Card title="Fotoğraflar">
           <div className="space-y-3">
-            <PhotoCapture galleryEnabled={galleryEnabled} label="Başlangıç Fotoğrafı" photoType="start" serviceId={service.id} />
-            <PhotoCapture galleryEnabled={galleryEnabled} label="Bitiş Fotoğrafı" photoType="end" serviceId={service.id} />
-            <PhotoCapture galleryEnabled={galleryEnabled} label="Ara Fotoğraf" photoType="during" serviceId={service.id} />
+            <PhotoCapture
+              disabledReason={photoDisabledReason(role, service.status, "start")}
+              galleryEnabled={galleryEnabled}
+              label="Başlangıç Fotoğrafı"
+              photoType="start"
+              serviceId={service.id}
+              serviceStatus={service.status}
+            />
+            <PhotoCapture
+              disabledReason={photoDisabledReason(role, service.status, "end")}
+              galleryEnabled={galleryEnabled}
+              label="Bitiş Fotoğrafı"
+              photoType="end"
+              serviceId={service.id}
+              serviceStatus={service.status}
+            />
+            <PhotoCapture
+              disabledReason={photoDisabledReason(role, service.status, "during")}
+              galleryEnabled={galleryEnabled}
+              label="Ara Fotoğraf"
+              photoType="during"
+              serviceId={service.id}
+              serviceStatus={service.status}
+            />
           </div>
           {photos.length > 0 ? (
             <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-3">
@@ -162,28 +192,27 @@ export function ServiceDetail({
           )}
         </Card>
 
-        {/* Actions card */}
-        <Card title="Aksiyonlar">
-          <div className="flex flex-wrap gap-2">
-            {statusActions.map(([status, label]) => (
-              <form action={updateServiceStatusAction} key={status}>
-                <input name="id" type="hidden" value={service.id} />
-                <input name="status" type="hidden" value={status} />
-                <button className="rounded-lg border border-border bg-panel px-4 py-2 text-sm font-medium text-foreground transition hover:border-accent/40 hover:bg-accent-surface hover:text-accent">
-                  {label}
-                </button>
-              </form>
-            ))}
-          </div>
-          {role === "admin" ? (
+        {role === "admin" ? (
+          <Card title="Aksiyonlar">
+            <div className="flex flex-wrap gap-2">
+              {statusActions.map(([status, label]) => (
+                <form action={updateServiceStatusAction} key={status}>
+                  <input name="id" type="hidden" value={service.id} />
+                  <input name="status" type="hidden" value={status} />
+                  <button className="rounded-lg border border-border bg-panel px-4 py-2 text-sm font-medium text-foreground transition hover:border-accent/40 hover:bg-accent-surface hover:text-accent">
+                    {label}
+                  </button>
+                </form>
+              ))}
+            </div>
             <form action={deleteServiceAction} className="mt-3 border-t border-border pt-3">
               <input name="id" type="hidden" value={service.id} />
               <button className="rounded-lg border border-danger/30 bg-danger/8 px-4 py-2 text-sm font-medium text-danger transition hover:bg-danger/15">
                 Servisi Sil
               </button>
             </form>
-          ) : null}
-        </Card>
+          </Card>
+        ) : null}
       </section>
 
       {role === "admin" ? (

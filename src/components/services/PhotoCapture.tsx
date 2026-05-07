@@ -5,13 +5,15 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import type { PhotoType } from "@/lib/supabase/types";
+import type { PhotoType, ServiceStatus } from "@/lib/supabase/types";
 
 type PhotoCaptureProps = {
   serviceId: string;
   photoType: PhotoType;
   label: string;
   galleryEnabled?: boolean;
+  serviceStatus: ServiceStatus;
+  disabledReason?: string;
 };
 
 export function PhotoCapture({
@@ -19,6 +21,8 @@ export function PhotoCapture({
   photoType,
   label,
   galleryEnabled = true,
+  serviceStatus,
+  disabledReason,
 }: PhotoCaptureProps) {
   const router = useRouter();
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
@@ -70,6 +74,31 @@ export function PhotoCapture({
         return;
       }
 
+      const now = new Date().toISOString();
+      if (photoType === "start" && serviceStatus === "approved") {
+        const { error: updateError } = await supabase
+          .from("services")
+          .update({ status: "in_progress", started_at: now })
+          .eq("id", serviceId);
+
+        if (updateError) {
+          setMessage(updateError.message);
+          return;
+        }
+      }
+
+      if (photoType === "end" && serviceStatus === "in_progress") {
+        const { error: updateError } = await supabase
+          .from("services")
+          .update({ status: "completed", completed_at: now })
+          .eq("id", serviceId);
+
+        if (updateError) {
+          setMessage(updateError.message);
+          return;
+        }
+      }
+
       router.refresh();
     } finally {
       setIsUploading(false);
@@ -108,7 +137,7 @@ export function PhotoCapture({
           ) : null}
           <button
             className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-accent px-3 text-sm font-semibold text-white transition active:scale-95 hover:bg-accent-strong disabled:opacity-60"
-            disabled={isUploading}
+            disabled={isUploading || Boolean(disabledReason)}
             onClick={() => cameraInputRef.current?.click()}
             type="button"
           >
@@ -122,7 +151,7 @@ export function PhotoCapture({
           {galleryEnabled ? (
             <button
               className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-panel px-3 text-sm font-medium transition active:scale-95 hover:border-accent/40 hover:text-accent disabled:opacity-60"
-              disabled={isUploading}
+              disabled={isUploading || Boolean(disabledReason)}
               onClick={() => galleryInputRef.current?.click()}
               type="button"
             >
@@ -133,6 +162,7 @@ export function PhotoCapture({
         </div>
       </div>
 
+      {disabledReason ? <p className="mt-2 text-sm text-foreground/50">{disabledReason}</p> : null}
       {message ? <p className="mt-2 text-sm text-danger">{message}</p> : null}
     </div>
   );

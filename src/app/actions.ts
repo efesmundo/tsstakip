@@ -7,7 +7,6 @@ import { requireAdmin, requireProfile } from "@/lib/auth";
 import { createMemberAccount, deleteMemberAccount, updateMemberProfile } from "@/lib/supabase/members";
 import type {
   FeeType,
-  PaymentStatus,
   ServicePriority,
   ServiceStatus,
   TeamType,
@@ -92,7 +91,7 @@ export async function createServiceAction(formData: FormData) {
   const feeType = (text(formData, "fee_type") ?? "free") as FeeType;
   const teamType = (text(formData, "team_type") ?? "technical_team") as TeamType;
   const status: ServiceStatus =
-    feeType === "paid" ? "awaiting_approval" : "pending";
+    feeType === "paid" ? "awaiting_approval" : "approved";
   const memberId =
     teamType === "technical_team"
       ? profile.role === "admin"
@@ -122,10 +121,8 @@ export async function createServiceAction(formData: FormData) {
       fee_type: feeType,
       amount: amount(formData, "amount"),
       currency: text(formData, "currency") ?? "TRY",
-      payment_status: text(formData, "payment_status") as PaymentStatus | null,
-      warranty_code: text(formData, "warranty_code"),
-      warranty_expires_at: text(formData, "warranty_expires_at"),
       customer_approval_sent_at: feeType === "paid" ? new Date().toISOString() : null,
+      customer_approved_at: feeType === "paid" ? null : new Date().toISOString(),
       created_by: user.id,
     })
     .select("id")
@@ -168,9 +165,6 @@ export async function updateServiceAction(formData: FormData) {
       fee_type: (text(formData, "fee_type") ?? "free") as FeeType,
       amount: amount(formData, "amount"),
       currency: text(formData, "currency") ?? "TRY",
-      payment_status: text(formData, "payment_status") as PaymentStatus | null,
-      warranty_code: text(formData, "warranty_code"),
-      warranty_expires_at: text(formData, "warranty_expires_at"),
     })
     .eq("id", id);
 
