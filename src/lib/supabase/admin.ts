@@ -14,9 +14,9 @@ function normalizeUrl(raw: string): string {
   return url;
 }
 
-export function getSupabaseAdminClient() {
+export function getSupabaseAdminConfig() {
   const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const rawKey = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const rawKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY;
 
   if (!rawUrl) {
     throw new Error(
@@ -25,21 +25,27 @@ export function getSupabaseAdminClient() {
   }
   if (!rawKey) {
     throw new Error(
-      "SUPABASE_SERVICE_ROLE_KEY ortam değişkeni tanımlı değil. Vercel env vars'a ekleyin ve yeniden deploy edin.",
+      "SUPABASE_SERVICE_ROLE_KEY veya SUPABASE_SECRET_KEY ortam değişkeni tanımlı değil. Vercel env vars'a ekleyin ve yeniden deploy edin.",
     );
   }
 
   const supabaseUrl = normalizeUrl(rawUrl);
-  const supabaseSecretKey = rawKey.trim().replace(/^"|"$/g, "");
+  const supabaseAdminKey = rawKey.trim().replace(/^"|"$/g, "");
 
-  if (!supabaseSecretKey.startsWith("eyJ") && !supabaseSecretKey.startsWith("sb_secret_")) {
+  if (!supabaseAdminKey.startsWith("eyJ") && !supabaseAdminKey.startsWith("sb_secret_")) {
     throw new Error(
-      `SUPABASE_SERVICE_ROLE_KEY beklenen formatta değil (uzunluk: ${supabaseSecretKey.length}, ilk 6 karakter: "${supabaseSecretKey.slice(0, 6)}"). JWT (eyJ ile başlar) veya sb_secret_ formatında olmalı.`,
+      `Supabase admin key beklenen formatta değil (uzunluk: ${supabaseAdminKey.length}, ilk 6 karakter: "${supabaseAdminKey.slice(0, 6)}"). JWT (eyJ ile başlar) veya sb_secret_ formatında olmalı.`,
     );
   }
 
+  return { supabaseUrl, supabaseAdminKey };
+}
+
+export function getSupabaseAdminClient() {
+  const { supabaseUrl, supabaseAdminKey } = getSupabaseAdminConfig();
+
   if (!adminClient) {
-    adminClient = createClient<Database>(supabaseUrl, supabaseSecretKey, {
+    adminClient = createClient<Database>(supabaseUrl, supabaseAdminKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false,

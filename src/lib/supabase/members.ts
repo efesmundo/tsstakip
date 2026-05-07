@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getSupabaseAdminClient } from "./admin";
+import { getSupabaseAdminClient, getSupabaseAdminConfig } from "./admin";
 import type { UserRole } from "./types";
 
 type CreateMemberInput = {
@@ -19,16 +19,8 @@ type UpdateMemberInput = {
 };
 
 function getAuthEndpoint() {
-  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim().replace(/\/$/, "");
-  const secret = (
-    process.env.SUPABASE_SERVICE_ROLE_KEY ??
-    process.env.SUPABASE_SECRET_KEY ??
-    ""
-  ).trim();
-  if (!url || !secret) {
-    throw new Error("Supabase URL veya service role key eksik. Vercel env vars kontrol edin.");
-  }
-  return { url, secret };
+  const { supabaseUrl, supabaseAdminKey } = getSupabaseAdminConfig();
+  return { url: supabaseUrl, secret: supabaseAdminKey };
 }
 
 async function adminAuthFetch<T>(path: string, init: RequestInit): Promise<T> {
