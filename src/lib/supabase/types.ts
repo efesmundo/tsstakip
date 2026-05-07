@@ -151,6 +151,7 @@ export type Database = {
       services: {
         Row: {
           id: string;
+          service_number: string;
           customer_name: string;
           customer_phone: string;
           address: string;
@@ -185,6 +186,7 @@ export type Database = {
         };
         Insert: {
           id?: string;
+          service_number?: string;
           customer_name: string;
           customer_phone: string;
           address: string;

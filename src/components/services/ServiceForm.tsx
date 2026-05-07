@@ -1,3 +1,7 @@
+"use client";
+
+import { useMemo, useState } from "react";
+
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import type {
   ProductGroup,
@@ -7,7 +11,7 @@ import type {
   Subcontractor,
 } from "@/lib/data";
 import { feeLabels, priorityLabels, statusLabels } from "@/lib/labels";
-import type { FeeType, ServicePriority, ServiceStatus } from "@/lib/supabase/types";
+import type { FeeType, ServicePriority, ServiceStatus, TeamType } from "@/lib/supabase/types";
 
 type ServiceFormProps = {
   action: (formData: FormData) => void | Promise<void>;
@@ -48,6 +52,19 @@ export function ServiceForm({
   role,
 }: ServiceFormProps) {
   const isAdmin = role === "admin";
+  const initialTeamType = service?.team_type ?? "technical_team";
+  const [teamType, setTeamType] = useState(initialTeamType);
+  const [subcontractorId, setSubcontractorId] = useState(service?.subcontractor_id ?? "");
+  const selectedSubcontractor = useMemo(
+    () => subcontractors.find((item) => item.id === subcontractorId),
+    [subcontractorId, subcontractors],
+  );
+  const isSubcontractorTeam = teamType === "subcontractor";
+  const isTechnicalTeam = teamType === "technical_team";
+  const subcontractorContact =
+    selectedSubcontractor?.contact_name ?? service?.subcontractor_contact ?? "";
+  const subcontractorPhone =
+    selectedSubcontractor?.phone ?? service?.subcontractor_phone ?? "";
 
   return (
     <form action={action} className="space-y-5">
@@ -109,26 +126,51 @@ export function ServiceForm({
 
       <Section step="3" title="Ekip ve Ücret">
         <div className="grid gap-4 md:grid-cols-2">
-          {isAdmin ? (
-            <Select label="Üye" name="member_id" value={service?.member_id}>
+          <Select
+            label="Ekip Tipi"
+            name="team_type"
+            onChange={(value) => setTeamType(value as TeamType)}
+            value={teamType}
+          >
+            <option value="technical_team">Teknik Ekip</option>
+            <option value="subcontractor">Taşeron</option>
+          </Select>
+          {isAdmin && isTechnicalTeam ? (
+            <Select label="Teknik Ekip Üyesi" name="member_id" value={service?.member_id}>
               <option value="">Seçiniz</option>
               {members.map((member) => (
                 <option key={member.id} value={member.id}>{member.full_name}</option>
               ))}
             </Select>
           ) : null}
-          <Select label="Ekip Tipi" name="team_type" value={service?.team_type ?? "technical_team"}>
-            <option value="technical_team">Teknik Ekip</option>
-            <option value="subcontractor">Taşeron</option>
-          </Select>
-          <Select label="Taşeron Firma" name="subcontractor_id" value={service?.subcontractor_id}>
-            <option value="">Yok</option>
-            {subcontractors.map((item) => (
-              <option key={item.id} value={item.id}>{item.name}</option>
-            ))}
-          </Select>
-          <Field label="Taşeron Sorumlu" name="subcontractor_contact" value={service?.subcontractor_contact} />
-          <Field label="Taşeron Telefon" name="subcontractor_phone" value={service?.subcontractor_phone} />
+          {isSubcontractorTeam ? (
+            <>
+              <Select
+                label="Taşeron Firma"
+                name="subcontractor_id"
+                onChange={setSubcontractorId}
+                required
+                value={subcontractorId}
+              >
+                <option value="">Seçiniz</option>
+                {subcontractors.map((item) => (
+                  <option key={item.id} value={item.id}>{item.name}</option>
+                ))}
+              </Select>
+              <Field
+                label="Taşeron Sorumlu"
+                name="subcontractor_contact"
+                readOnly
+                value={subcontractorContact}
+              />
+              <Field
+                label="Taşeron Telefon"
+                name="subcontractor_phone"
+                readOnly
+                value={subcontractorPhone}
+              />
+            </>
+          ) : null}
           <Select label="Ücretlendirme" name="fee_type" value={service?.fee_type ?? "free"}>
             {feeTypes.map((fee) => (
               <option key={fee} value={fee}>{feeLabels[fee]}</option>
@@ -180,6 +222,7 @@ function Field({
   label,
   name,
   required,
+  readOnly,
   type = "text",
   value,
 }: {
@@ -187,6 +230,7 @@ function Field({
   label: string;
   name: string;
   required?: boolean;
+  readOnly?: boolean;
   type?: string;
   value?: string | null;
 }) {
@@ -195,10 +239,12 @@ function Field({
       <span className="mb-1.5 block text-sm font-medium text-foreground/75">{label}</span>
       <input
         className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/15"
-        defaultValue={value ?? ""}
+        defaultValue={readOnly ? undefined : value ?? ""}
         name={name}
+        readOnly={readOnly}
         required={required}
         type={type}
+        value={readOnly ? value ?? "" : undefined}
       />
     </label>
   );
@@ -208,11 +254,15 @@ function Select({
   children,
   label,
   name,
+  onChange,
+  required,
   value,
 }: {
   children: React.ReactNode;
   label: string;
   name: string;
+  onChange?: (value: string) => void;
+  required?: boolean;
   value?: string | null;
 }) {
   return (
@@ -222,6 +272,8 @@ function Select({
         className="h-11 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/15"
         defaultValue={value ?? ""}
         name={name}
+        onChange={onChange ? (event) => onChange(event.target.value) : undefined}
+        required={required}
       >
         {children}
       </select>

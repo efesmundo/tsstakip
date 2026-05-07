@@ -17,7 +17,7 @@ import type {
   ServiceType,
   Subcontractor,
 } from "@/lib/data";
-import { feeLabels, formatCurrency, formatDateTime, priorityLabels } from "@/lib/labels";
+import { feeLabels, formatCurrency, formatDateTime, priorityLabels, teamLabels } from "@/lib/labels";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 
@@ -74,6 +74,7 @@ export function ServiceDetail({
             <StatusBadge status={service.status} />
           </div>
           <dl className="mt-4 divide-y divide-border text-sm">
+            <Row label="Servis No" value={service.service_number} />
             <Row label="Telefon" value={service.customer_phone} />
             <Row label="Adres" value={service.address} />
             <Row label="İlçe" value={service.district ?? "—"} />
@@ -81,7 +82,15 @@ export function ServiceDetail({
             <Row label="Proje" value={service.project_name ?? "—"} />
             <Row label="Ürün Grubu" value={product?.name ?? "—"} />
             <Row label="Servis Tipi" value={type?.name ?? "—"} />
+            <Row label="Ekip Tipi" value={teamLabels[service.team_type]} />
             <Row label="Üye" value={member?.full_name ?? "—"} />
+            {service.team_type === "subcontractor" ? (
+              <>
+                <Row label="Taşeron" value={subcontractors.find((item) => item.id === service.subcontractor_id)?.name ?? "—"} />
+                <Row label="Sorumlu" value={service.subcontractor_contact ?? "—"} />
+                <Row label="Taşeron Tel" value={service.subcontractor_phone ?? "—"} />
+              </>
+            ) : null}
             <Row label="Öncelik" value={priorityLabels[service.priority]} />
             <Row label="Planlanan" value={formatDateTime(service.scheduled_at)} />
             <Row label="Ücret" value={`${feeLabels[service.fee_type]} · ${formatCurrency(service.amount, service.currency)}`} />

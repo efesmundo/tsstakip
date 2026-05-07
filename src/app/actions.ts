@@ -34,6 +34,42 @@ function dateTime(value: string | null) {
   return value ? new Date(value).toISOString() : null;
 }
 
+type ActionSupabaseClient = Awaited<ReturnType<typeof requireProfile>>["supabase"];
+
+async function teamFields(
+  supabase: ActionSupabaseClient,
+  teamType: TeamType,
+  subcontractorId: string | null,
+) {
+  if (teamType !== "subcontractor") {
+    return {
+      subcontractor_id: null,
+      subcontractor_contact: null,
+      subcontractor_phone: null,
+    };
+  }
+
+  if (!subcontractorId) {
+    return {
+      subcontractor_id: null,
+      subcontractor_contact: null,
+      subcontractor_phone: null,
+    };
+  }
+
+  const { data } = await supabase
+    .from("subcontractors")
+    .select("id,contact_name,phone")
+    .eq("id", subcontractorId)
+    .single();
+
+  return {
+    subcontractor_id: subcontractorId,
+    subcontractor_contact: data?.contact_name ?? null,
+    subcontractor_phone: data?.phone ?? null,
+  };
+}
+
 function formatError(error: unknown): string {
   if (error instanceof Error) return error.message;
   if (typeof error === "object" && error !== null) {
@@ -54,10 +90,16 @@ function formatError(error: unknown): string {
 export async function createServiceAction(formData: FormData) {
   const { supabase, user, profile } = await requireProfile();
   const feeType = (text(formData, "fee_type") ?? "free") as FeeType;
+  const teamType = (text(formData, "team_type") ?? "technical_team") as TeamType;
   const status: ServiceStatus =
     feeType === "paid" ? "awaiting_approval" : "pending";
   const memberId =
-    profile.role === "admin" ? (text(formData, "member_id") ?? user.id) : user.id;
+    teamType === "technical_team"
+      ? profile.role === "admin"
+        ? (text(formData, "member_id") ?? user.id)
+        : user.id
+      : null;
+  const assignment = await teamFields(supabase, teamType, text(formData, "subcontractor_id"));
 
   const { data, error } = await supabase
     .from("services")
@@ -75,10 +117,8 @@ export async function createServiceAction(formData: FormData) {
       scheduled_at: dateTime(text(formData, "scheduled_at")),
       description: text(formData, "description"),
       status,
-      team_type: (text(formData, "team_type") ?? "technical_team") as TeamType,
-      subcontractor_id: text(formData, "subcontractor_id"),
-      subcontractor_contact: text(formData, "subcontractor_contact"),
-      subcontractor_phone: text(formData, "subcontractor_phone"),
+      team_type: teamType,
+      ...assignment,
       fee_type: feeType,
       amount: amount(formData, "amount"),
       currency: text(formData, "currency") ?? "TRY",
@@ -104,6 +144,8 @@ export async function updateServiceAction(formData: FormData) {
   const { supabase } = await requireAdmin();
   const id = text(formData, "id");
   if (!id) return;
+  const teamType = (text(formData, "team_type") ?? "technical_team") as TeamType;
+  const assignment = await teamFields(supabase, teamType, text(formData, "subcontractor_id"));
 
   const { error } = await supabase
     .from("services")
@@ -116,11 +158,13 @@ export async function updateServiceAction(formData: FormData) {
       project_name: text(formData, "project_name"),
       product_group_id: text(formData, "product_group_id"),
       service_type_id: text(formData, "service_type_id"),
-      member_id: text(formData, "member_id"),
+      member_id: teamType === "technical_team" ? text(formData, "member_id") : null,
       priority: (text(formData, "priority") ?? "normal") as ServicePriority,
       scheduled_at: dateTime(text(formData, "scheduled_at")),
       description: text(formData, "description"),
       status: (text(formData, "status") ?? "pending") as ServiceStatus,
+      team_type: teamType,
+      ...assignment,
       fee_type: (text(formData, "fee_type") ?? "free") as FeeType,
       amount: amount(formData, "amount"),
       currency: text(formData, "currency") ?? "TRY",

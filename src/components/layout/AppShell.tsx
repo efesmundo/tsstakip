@@ -13,12 +13,14 @@ type AppHeaderProps = {
 };
 
 export function AppHeader({ nav }: AppHeaderProps) {
+  const homeHref = nav[0]?.href ?? "/";
+
   return (
     <header className="sticky top-0 z-30 bg-accent text-white" style={{ boxShadow: "var(--shadow-md)" }}>
       <div className="mx-auto flex max-w-7xl items-center gap-4 px-5 py-3 md:px-8">
         <Link
           className="flex items-center gap-2.5 text-white/90 transition hover:text-white"
-          href="/"
+          href={homeHref}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img alt="TSS Takip" className="size-8 rounded-md" src="/icon.svg" />

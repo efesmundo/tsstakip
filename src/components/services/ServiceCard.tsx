@@ -35,6 +35,7 @@ export function ServiceCard({ service, lookup, href }: ServiceCardProps) {
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-base font-semibold text-foreground">{service.customer_name}</h3>
+              <Chip label={service.service_number} />
               <StatusBadge status={service.status} />
               {service.priority !== "normal" ? (
                 <PriorityBadge priority={service.priority} />
