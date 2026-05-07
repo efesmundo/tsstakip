@@ -15,12 +15,48 @@ async function runCreateUserTestAction(formData: FormData) {
   await requireAdmin();
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "").trim();
+  const mode = String(formData.get("mode") ?? "sdk");
   if (!email || !password) return;
 
-  const supabase = getSupabaseAdminClient();
-  let stage = "init";
+  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim().replace(/\/$/, "");
+  const secret = (
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    process.env.SUPABASE_SECRET_KEY ??
+    ""
+  ).trim();
+
+  const { redirect } = await import("next/navigation");
+
   try {
-    stage = "auth.admin.createUser";
+    if (mode === "fetch") {
+      // Direct POST bypassing supabase-js entirely
+      const response = await fetch(`${url}/auth/v1/admin/users`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${secret}`,
+          apikey: secret,
+        },
+        body: JSON.stringify({ email, password, email_confirm: true }),
+        cache: "no-store",
+      });
+      const body = await response.text();
+      const isHtml = body.trimStart().startsWith("<");
+      const payload = JSON.stringify(
+        {
+          mode: "direct fetch POST",
+          status: response.status,
+          isHtml,
+          headers: Object.fromEntries(response.headers.entries()),
+          bodyPreview: body.slice(0, 800),
+        },
+        null,
+        2,
+      );
+      redirect(`/admin/debug?testResult=${encodeURIComponent(payload)}`);
+    }
+
+    const supabase = getSupabaseAdminClient();
     const result = await supabase.auth.admin.createUser({
       email,
       password,
@@ -29,6 +65,7 @@ async function runCreateUserTestAction(formData: FormData) {
 
     const stringified = JSON.stringify(
       {
+        mode: "supabase-js SDK",
         ok: !result.error,
         userId: result.data?.user?.id ?? null,
         userEmail: result.data?.user?.email ?? null,
@@ -39,7 +76,6 @@ async function runCreateUserTestAction(formData: FormData) {
       null,
       2,
     );
-    const { redirect } = await import("next/navigation");
     redirect(`/admin/debug?testResult=${encodeURIComponent(stringified)}`);
   } catch (error) {
     if (
@@ -55,7 +91,6 @@ async function runCreateUserTestAction(formData: FormData) {
     const payload = JSON.stringify(
       {
         thrown: true,
-        stage,
         type: error?.constructor?.name ?? typeof error,
         message: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack?.split("\n").slice(0, 5).join("\n") : null,
@@ -63,7 +98,6 @@ async function runCreateUserTestAction(formData: FormData) {
       null,
       2,
     );
-    const { redirect } = await import("next/navigation");
     redirect(`/admin/debug?testResult=${encodeURIComponent(payload)}`);
   }
 }
@@ -190,27 +224,41 @@ export default async function DebugPage({
             Bu test, üye ekleme aksiyonunun kullandığı çağrının aynısını yapar. Sonuç aşağıda raw JSON
             olarak görünür.
           </p>
-          <form action={runCreateUserTestAction} className="grid gap-2 md:grid-cols-[1fr_1fr_auto]">
-            <input
-              className="h-11 rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-accent"
-              placeholder="test@example.com"
-              name="email"
-              type="email"
-              required
-            />
-            <input
-              className="h-11 rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-accent"
-              defaultValue="TestPassword123!"
-              name="password"
-              type="text"
-              required
-            />
-            <button
-              className="h-11 rounded-lg bg-accent px-4 text-sm font-semibold text-white"
-              type="submit"
-            >
-              Test Et
-            </button>
+          <form action={runCreateUserTestAction} className="space-y-2">
+            <div className="grid gap-2 md:grid-cols-2">
+              <input
+                className="h-11 rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-accent"
+                placeholder="test@example.com"
+                name="email"
+                type="email"
+                required
+              />
+              <input
+                className="h-11 rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-accent"
+                defaultValue="TestPassword123!"
+                name="password"
+                type="text"
+                required
+              />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                className="h-11 flex-1 rounded-lg bg-accent px-4 text-sm font-semibold text-white"
+                name="mode"
+                type="submit"
+                value="sdk"
+              >
+                SDK ile Test Et
+              </button>
+              <button
+                className="h-11 flex-1 rounded-lg border border-accent bg-panel px-4 text-sm font-semibold text-accent"
+                name="mode"
+                type="submit"
+                value="fetch"
+              >
+                Doğrudan POST ile Test Et
+              </button>
+            </div>
           </form>
 
           {testResult ? (
