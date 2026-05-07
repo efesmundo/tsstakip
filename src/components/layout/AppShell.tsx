@@ -69,6 +69,7 @@ export const adminNav: NavItem[] = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/services", label: "Servisler" },
   { href: "/admin/services/new", label: "Yeni Servis" },
+  { href: "/admin/reports", label: "Raporlar" },
   { href: "/admin/members", label: "Üyeler" },
   { href: "/admin/settings", label: "Ayarlar" },
 ];
