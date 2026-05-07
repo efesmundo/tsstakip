@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/layout/AppShell";
 import { ServiceGroup } from "@/components/services/ServiceGroup";
 import { requireAdmin } from "@/lib/auth";
 import { createLookup } from "@/lib/data";
+import { inRange, resolvePeriod } from "@/lib/reports";
 
 export default async function AdminPage() {
   const { supabase } = await requireAdmin();
@@ -29,8 +30,8 @@ export default async function AdminPage() {
     members: membersResult.data,
     subcontractors: subcontractorsResult.data,
   });
-  const today = new Date().toISOString().slice(0, 10);
-  const todayServices = services.filter((item) => item.scheduled_at?.startsWith(today));
+  const { range: todayRange } = resolvePeriod("today");
+  const todayServices = services.filter((item) => inRange(item.created_at, todayRange));
   const awaiting = services.filter((item) => item.status === "awaiting_approval");
   const completed = services.filter((item) => item.status === "completed");
   const urgent = services.filter((item) => item.priority === "urgent");
