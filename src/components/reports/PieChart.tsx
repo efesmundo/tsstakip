@@ -42,8 +42,7 @@ export function PieChart({ data, size = 180, title }: PieChartProps) {
   const cx = size / 2;
   const cy = size / 2;
   const r = size / 2 - 4;
-  const ringWidth = size / 4.5;
-  const innerR = r - ringWidth;
+  const innerR = r - size / 4.5;
 
   // Compute cumulative offsets up front (no mutation during render)
   const offsets = data.reduce<number[]>((acc, slice) => {
@@ -60,9 +59,11 @@ export function PieChart({ data, size = 180, title }: PieChartProps) {
     const color = slice.color ?? PALETTE[index % PALETTE.length];
 
     if (data.length === 1) {
+      // Donut as outer + inner filled circles (avoids stroke clipping at viewBox edges)
       return (
         <g key={slice.label}>
-          <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth={ringWidth} />
+          <circle cx={cx} cy={cy} fill={color} r={r} />
+          <circle cx={cx} cy={cy} fill="var(--panel)" r={innerR} />
         </g>
       );
     }
