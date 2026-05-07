@@ -88,9 +88,6 @@ export const adminNav: NavItem[] = [
   {
     href: "/admin/services",
     label: "Servisler",
-    children: [
-      { href: "/admin/services", label: "Servis Listesi" },
-    ],
   },
   { href: "/admin/reports", label: "Raporlar" },
   { href: "/admin/members", label: "Üyeler" },
@@ -101,8 +98,5 @@ export const memberNav: NavItem[] = [
   {
     href: "/member",
     label: "Servislerim",
-    children: [
-      { href: "/member", label: "Servis Listesi" },
-    ],
   },
 ];
