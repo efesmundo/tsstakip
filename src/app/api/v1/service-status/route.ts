@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { validateServiceStatusBearer } from "@/lib/api-tokens";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { ServiceStatus } from "@/lib/supabase/types";
 
@@ -13,14 +14,13 @@ type StatusPayload = {
   kabul?: unknown;
 };
 
-function readApiKey(request: Request) {
-  const headerKey = request.headers.get("x-api-key");
+function readBearerToken(request: Request) {
   const authHeader = request.headers.get("authorization");
-  const bearerKey = authHeader?.toLowerCase().startsWith("bearer ")
+  const bearerToken = authHeader?.toLowerCase().startsWith("bearer ")
     ? authHeader.slice(7).trim()
     : null;
 
-  return headerKey ?? bearerKey;
+  return bearerToken;
 }
 
 function parseBoolean(value: unknown) {
@@ -37,13 +37,9 @@ function jsonError(message: string, status: number) {
 }
 
 export async function POST(request: Request) {
-  const expectedApiKey = process.env.SERVICE_STATUS_API_KEY?.trim();
-  if (!expectedApiKey) {
-    return jsonError("SERVICE_STATUS_API_KEY tanımlı değil.", 500);
-  }
-
-  if (readApiKey(request) !== expectedApiKey) {
-    return jsonError("Geçersiz API anahtarı.", 401);
+  const isAuthenticated = await validateServiceStatusBearer(readBearerToken(request));
+  if (!isAuthenticated) {
+    return jsonError("Geçersiz veya eksik bearer token.", 401);
   }
 
   let payload: StatusPayload;

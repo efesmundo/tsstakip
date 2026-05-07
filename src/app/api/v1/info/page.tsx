@@ -1,7 +1,9 @@
 import { KeyRound, ShieldCheck } from "lucide-react";
 
+import { ApiTokenManager } from "@/components/api/ApiTokenManager";
 import { ApiInfoLoginForm } from "@/components/auth/ApiInfoLoginForm";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { getServiceStatusTokenInfo } from "@/lib/api-tokens";
 import { getSessionProfile } from "@/lib/auth";
 
 const endpoint = "/api/v1/service-status";
@@ -34,6 +36,8 @@ export default async function ApiInfoPage() {
     );
   }
 
+  const tokenInfo = await getServiceStatusTokenInfo().catch(() => null);
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       <header className="bg-accent px-5 py-5 text-white">
@@ -48,6 +52,10 @@ export default async function ApiInfoPage() {
 
       <div className="mx-auto grid max-w-6xl gap-5 px-5 py-6 lg:grid-cols-[0.9fr_1.1fr]">
         <section className="space-y-4">
+          <Card title="Bearer Token Yönetimi">
+            <ApiTokenManager initialTokenInfo={tokenInfo} />
+          </Card>
+
           <Card title="Endpoint">
             <Code>{`POST ${endpoint}`}</Code>
             <p className="mt-3 text-sm leading-6 text-foreground/65">
@@ -61,13 +69,13 @@ export default async function ApiInfoPage() {
                 <KeyRound size={17} aria-hidden="true" />
               </div>
               <div>
-                <p className="text-sm font-semibold">Header ile API key gönderilir.</p>
+                <p className="text-sm font-semibold">Header ile bearer token gönderilir.</p>
                 <p className="mt-1 text-sm text-foreground/65">
-                  Vercel ortam değişkeninde <code>SERVICE_STATUS_API_KEY</code> tanımlı olmalıdır.
+                  Token yukarıdaki bölümden üretilir. Silinen veya yeniden üretilen eski tokenlar geçersiz olur.
                 </p>
               </div>
             </div>
-            <Code>{`x-api-key: SERVICE_STATUS_API_KEY_DEGERI`}</Code>
+            <Code>{`Authorization: Bearer TSS_TOKEN_DEGERI`}</Code>
           </Card>
 
           <Card title="Body">
@@ -82,7 +90,7 @@ export default async function ApiInfoPage() {
           <Card title="cURL Örneği">
             <Code>{`curl -X POST "https://tsstakip.vercel.app${endpoint}" \\
   -H "Content-Type: application/json" \\
-  -H "x-api-key: SERVICE_STATUS_API_KEY_DEGERI" \\
+  -H "Authorization: Bearer TSS_TOKEN_DEGERI" \\
   -d '{
     "service_number": "SRV-2026-000001",
     "accepted": true
@@ -104,7 +112,7 @@ export default async function ApiInfoPage() {
 
           <Card title="Hata Yanıtları">
             <ul className="space-y-2 text-sm text-foreground/70">
-              <li><code>401</code> Geçersiz API anahtarı.</li>
+              <li><code>401</code> Eksik veya geçersiz bearer token.</li>
               <li><code>400</code> Eksik servis numarası veya boolean olmayan <code>accepted</code>.</li>
               <li><code>404</code> Servis numarası bulunamadı.</li>
               <li><code>500</code> Sunucu veya ortam değişkeni hatası.</li>

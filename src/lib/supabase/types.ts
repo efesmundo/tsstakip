@@ -244,6 +244,28 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["service_photos"]["Insert"]>;
         Relationships: [];
       };
+      api_tokens: {
+        Row: {
+          id: string;
+          name: string;
+          token_hash: string;
+          token_preview: string;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          name: string;
+          token_hash: string;
+          token_preview: string;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["api_tokens"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
