@@ -1,5 +1,8 @@
+import { Trash2 } from "lucide-react";
+
 import {
   deleteServiceAction,
+  deleteServicePhotoAction,
   updateServiceAction,
   updateServiceStatusAction,
 } from "@/app/actions";
@@ -102,24 +105,43 @@ export function ServiceDetail({
           {photos.length > 0 ? (
             <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-3">
               {photos.map((photo) => (
-                <a
-                  className="group overflow-hidden rounded-lg border border-border bg-panel-muted"
-                  href={photoUrl(photo.storage_path)}
+                <div
+                  className="group relative overflow-hidden rounded-lg border border-border bg-panel-muted"
                   key={photo.id}
-                  rel="noopener noreferrer"
-                  target="_blank"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    alt={photoTypeLabels[photo.photo_type] ?? photo.photo_type}
-                    className="aspect-video w-full object-cover transition group-hover:opacity-90"
-                    loading="lazy"
-                    src={photoUrl(photo.storage_path)}
-                  />
-                  <p className="px-2 py-1 text-xs font-medium text-foreground/70">
-                    {photoTypeLabels[photo.photo_type] ?? photo.photo_type}
-                  </p>
-                </a>
+                  <a
+                    className="block"
+                    href={photoUrl(photo.storage_path)}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      alt={photoTypeLabels[photo.photo_type] ?? photo.photo_type}
+                      className="aspect-video w-full object-cover transition group-hover:opacity-90"
+                      loading="lazy"
+                      src={photoUrl(photo.storage_path)}
+                    />
+                  </a>
+                  <div className="flex items-center justify-between gap-2 px-2 py-1">
+                    <p className="text-xs font-medium text-foreground/70">
+                      {photoTypeLabels[photo.photo_type] ?? photo.photo_type}
+                    </p>
+                    <form action={deleteServicePhotoAction}>
+                      <input name="id" type="hidden" value={photo.id} />
+                      <input name="service_id" type="hidden" value={service.id} />
+                      <input name="storage_path" type="hidden" value={photo.storage_path} />
+                      <button
+                        aria-label="Fotoğrafı sil"
+                        className="flex h-7 w-7 items-center justify-center rounded-md text-foreground/40 transition active:scale-90 hover:bg-danger/10 hover:text-danger"
+                        title="Fotoğrafı sil"
+                        type="submit"
+                      >
+                        <Trash2 size={13} aria-hidden="true" />
+                      </button>
+                    </form>
+                  </div>
+                </div>
               ))}
             </div>
           ) : (

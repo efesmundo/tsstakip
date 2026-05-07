@@ -156,6 +156,20 @@ export async function deleteServiceAction(formData: FormData) {
   redirect("/admin/services");
 }
 
+export async function deleteServicePhotoAction(formData: FormData) {
+  const { supabase, profile } = await requireProfile();
+  const id = text(formData, "id");
+  const serviceId = text(formData, "service_id");
+  const storagePath = text(formData, "storage_path");
+  if (!id || !storagePath || !serviceId) return;
+
+  await supabase.storage.from("service-photos").remove([storagePath]);
+  await supabase.from("service_photos").delete().eq("id", id);
+
+  const base = profile.role === "admin" ? "/admin" : "/member";
+  revalidatePath(`${base}/services/${serviceId}`);
+}
+
 export async function createMemberAction(formData: FormData) {
   await requireAdmin();
   await createMemberAccount({

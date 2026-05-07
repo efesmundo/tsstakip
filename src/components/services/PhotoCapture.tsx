@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, Square, X } from "lucide-react";
+import { Camera, ImageIcon, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
@@ -11,140 +11,127 @@ type PhotoCaptureProps = {
   serviceId: string;
   photoType: PhotoType;
   label: string;
+  galleryEnabled?: boolean;
 };
 
-export function PhotoCapture({ serviceId, photoType, label }: PhotoCaptureProps) {
+export function PhotoCapture({
+  serviceId,
+  photoType,
+  label,
+  galleryEnabled = true,
+}: PhotoCaptureProps) {
   const router = useRouter();
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
+  const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  async function openCamera() {
+  async function handleFile(file: File) {
     setMessage(null);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: { facingMode: "environment" },
-      });
-      streamRef.current = stream;
-      setIsOpen(true);
-      requestAnimationFrame(() => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      });
-    } catch {
-      setMessage("Kamera açılamadı. Tarayıcı izinlerini kontrol edin.");
-    }
-  }
-
-  function closeCamera() {
-    streamRef.current?.getTracks().forEach((track) => track.stop());
-    streamRef.current = null;
-    setIsOpen(false);
-  }
-
-  async function capture() {
-    if (!videoRef.current) return;
     setIsUploading(true);
-    setMessage(null);
 
-    const canvas = document.createElement("canvas");
-    canvas.width = videoRef.current.videoWidth;
-    canvas.height = videoRef.current.videoHeight;
-    const context = canvas.getContext("2d");
-    context?.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+    try {
+      const supabase = getSupabaseBrowserClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    const blob = await new Promise<Blob | null>((resolve) => {
-      canvas.toBlob(resolve, "image/jpeg", 0.88);
-    });
+      if (!user) {
+        setMessage("Oturum bulunamadı.");
+        return;
+      }
 
-    if (!blob) {
-      setMessage("Fotoğraf oluşturulamadı.");
-      setIsUploading(false);
-      return;
-    }
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const safeExt = ["jpg", "jpeg", "png", "webp"].includes(ext) ? ext : "jpg";
+      const storagePath = `services/${serviceId}/${photoType}-${Date.now()}.${safeExt}`;
 
-    const supabase = getSupabaseBrowserClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      const { error: uploadError } = await supabase.storage
+        .from("service-photos")
+        .upload(storagePath, file, {
+          contentType: file.type || "image/jpeg",
+          upsert: false,
+        });
 
-    if (!user) {
-      setMessage("Oturum bulunamadı.");
-      setIsUploading(false);
-      return;
-    }
+      if (uploadError) {
+        setMessage(uploadError.message);
+        return;
+      }
 
-    const storagePath = `services/${serviceId}/${photoType}-${Date.now()}.jpg`;
-    const { error: uploadError } = await supabase.storage
-      .from("service-photos")
-      .upload(storagePath, blob, {
-        contentType: "image/jpeg",
-        upsert: false,
+      const { error: insertError } = await supabase.from("service_photos").insert({
+        service_id: serviceId,
+        photo_type: photoType,
+        storage_path: storagePath,
+        uploaded_by: user.id,
+        taken_at: new Date().toISOString(),
       });
 
-    if (uploadError) {
-      setMessage(uploadError.message);
+      if (insertError) {
+        setMessage(insertError.message);
+        return;
+      }
+
+      router.refresh();
+    } finally {
       setIsUploading(false);
-      return;
     }
-
-    const { error: insertError } = await supabase.from("service_photos").insert({
-      service_id: serviceId,
-      photo_type: photoType,
-      storage_path: storagePath,
-      uploaded_by: user.id,
-      taken_at: new Date().toISOString(),
-    });
-
-    if (insertError) {
-      setMessage(insertError.message);
-      setIsUploading(false);
-      return;
-    }
-
-    closeCamera();
-    setIsUploading(false);
-    router.refresh();
   }
 
   return (
-    <div className="rounded-md border border-border bg-background p-3">
-      <div className="flex items-center justify-between gap-3">
+    <div className="rounded-lg border border-border bg-background p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-medium">{label}</p>
-        <button
-          className="inline-flex h-9 items-center gap-2 rounded-md bg-accent px-3 text-sm font-semibold text-white"
-          onClick={isOpen ? closeCamera : openCamera}
-          type="button"
-        >
-          {isOpen ? <X size={16} aria-hidden="true" /> : <Camera size={16} aria-hidden="true" />}
-          {isOpen ? "Kapat" : "Kamera"}
-        </button>
-      </div>
-
-      {isOpen ? (
-        <div className="mt-3 space-y-3">
-          <video
-            autoPlay
-            className="aspect-video w-full rounded-md bg-black object-cover"
-            muted
-            playsInline
-            ref={videoRef}
+        <div className="flex gap-2">
+          <input
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) handleFile(file);
+              event.target.value = "";
+            }}
+            ref={cameraInputRef}
+            type="file"
           />
+          {galleryEnabled ? (
+            <input
+              accept="image/*"
+              className="hidden"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) handleFile(file);
+                event.target.value = "";
+              }}
+              ref={galleryInputRef}
+              type="file"
+            />
+          ) : null}
           <button
-            className="inline-flex h-10 items-center gap-2 rounded-md border border-border px-3 text-sm font-medium"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-accent px-3 text-sm font-semibold text-white transition active:scale-95 hover:bg-accent-strong disabled:opacity-60"
             disabled={isUploading}
-            onClick={capture}
+            onClick={() => cameraInputRef.current?.click()}
             type="button"
           >
-            <Square size={15} aria-hidden="true" />
-            {isUploading ? "Yükleniyor..." : "Fotoğraf Çek"}
+            {isUploading ? (
+              <Loader2 className="animate-spin" size={15} aria-hidden="true" />
+            ) : (
+              <Camera size={15} aria-hidden="true" />
+            )}
+            Kamera
           </button>
+          {galleryEnabled ? (
+            <button
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-panel px-3 text-sm font-medium transition active:scale-95 hover:border-accent/40 hover:text-accent disabled:opacity-60"
+              disabled={isUploading}
+              onClick={() => galleryInputRef.current?.click()}
+              type="button"
+            >
+              <ImageIcon size={15} aria-hidden="true" />
+              Galeri
+            </button>
+          ) : null}
         </div>
-      ) : null}
+      </div>
 
       {message ? <p className="mt-2 text-sm text-danger">{message}</p> : null}
     </div>
